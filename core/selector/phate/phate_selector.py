@@ -1,6 +1,6 @@
 from typing import Dict
 from ..i_selector import ISelector
-from models import AnalyzedResultModel
+from models.phate import PHATEAnalyzedResultModel
 from models.phate.phate_analyzed_result_model import PHATEAnalyzedResultModel
 from typing import List, Tuple, Dict
 import random
@@ -8,8 +8,8 @@ import random
 
 class PHATESelector(ISelector):
     def __init__(self):
-        self.analyzed_result_model = None
-        self.is_continue = None
+        self.analyzed_result_model: PHATEAnalyzedResultModel = None
+        self.is_continue: bool = None
         self.max_central_list: List[int] = None
 
     def select(self) -> List[Tuple[int, int, int, float]]:
@@ -19,7 +19,7 @@ class PHATESelector(ISelector):
         dlc_len = len(self.analyzed_result_model.distinct_low_centrals)
 
         if dlc_len < self.analyzed_result_model.max_centrals:
-            self.max_central_list = self.analyzed_result_model.distinct_low_centrals + random(self.analyzed_result_model.distinct_indices, self.analyzed_result_model.max_centrals - dlc_len)
+            self.max_central_list = self.analyzed_result_model.distinct_low_centrals + random.sample(self.analyzed_result_model.distinct_indices, self.analyzed_result_model.max_centrals - dlc_len)
         else:
             self.max_central_list = self.analyzed_result_model.distinct_low_centrals
 

@@ -1,4 +1,4 @@
-from analyzed_result_model import AnalyzedResultModel
+from models.analyzed_result_model import AnalyzedResultModel
 from typing import Dict, Tuple, Callable, List, Any
 import numpy as np
 from numpy import ndarray

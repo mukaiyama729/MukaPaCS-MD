@@ -1,7 +1,7 @@
 from typing import Dict, List, Tuple
 from ..i_analyzer import IAnalyzer
-from ....models import MDResultModel, AnalyzedResultModel
-from ....models.phate import PHATEAnalyzedResultModel
+from models import MDResultModel, AnalyzedResultModel
+from models.phate import PHATEAnalyzedResultModel
 import phate
 import numpy as np
 
@@ -27,7 +27,7 @@ class PHATEAnalyzer(IAnalyzer):
             result = self.md_result.result()
 
         #複数のList[np.ndarray]を一つのnp.ndarrayに変換
-        traj = np.array(list(current_result.values())).reshape(len(result), -1)
+        traj = np.array(list(result.values())).reshape(len(result), -1)
 
         traj_data = np.array(traj).astype(np.float64)
         self.analyzed_result = self.phate_operator.fit_transform(traj_data)
@@ -48,7 +48,7 @@ class PHATEAnalyzer(IAnalyzer):
         self.distinct_low_centrals = list(set(top_low_centrals) & set(distinct_indices))
 
         phate_analyzed_result_model = self.create_analyzed_result_model(
-            current_result,
+            result,
             current_state,
             max_centrals=self.max_centrals,
             eigen_centrals=eigen_centrals,

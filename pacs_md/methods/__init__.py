@@ -1,1 +1,2 @@
-from phate_pacs_md import phate_pacs_md
+from .phate_pacs_md import PHATEPaCSMD
+from .base_pacs_md import BasePaCSMD

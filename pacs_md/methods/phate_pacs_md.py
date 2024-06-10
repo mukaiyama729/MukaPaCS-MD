@@ -1,7 +1,8 @@
-from .pacs_md import PaCSMD
+from pacs_md.methods import BasePaCSMD
 from typing import List, Dict
+from settings import Settings
 
-class PHATEPaCSMD(PaCSMD):
+class PHATEPaCSMD(BasePaCSMD):
     def __init__(self):
         self._name = "PHATEPaCS-MD"
         self._description = "PaCS-MD with PHATE"

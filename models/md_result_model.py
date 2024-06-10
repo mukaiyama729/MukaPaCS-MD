@@ -4,7 +4,7 @@ from .base_result_model import BaseResultModel
 import numpy as np
 
 class MDResultModel(BaseResultModel):
-    def __init__(self, result: Dict[Tuple[int, int, int, float], List[np.ndarray]], current_state: Tuple[int, int], md_settings: Dict[str, object]):
+    def __init__(self, result: Dict[Tuple[int, int, int, float], List[np.ndarray]], current_state: Tuple[int, int],): #:
         super().__init__(result)
         '''
         result: Dict[Tuple[int, int, int, float], List[np.ndarray]]
@@ -12,7 +12,7 @@ class MDResultModel(BaseResultModel):
         result includes a few past trajectories and current trajectories.
         '''
         self.current_state = current_state
-        self.md_settings = md_settings
+        #self.md_settings = md_settings
 
     def get_current_result(self) -> Dict[Tuple[int, int, int, float], List[np.ndarray]]:
         current_result = {}

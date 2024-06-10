@@ -1,17 +1,20 @@
 from core import *
-from ..md import IMD
-from ...file import FileCreater
-import os, re, shutil
-from multiprocessing import Pool
-from typing import List, Dict, Tuple
+from pacs_md.md import IMD
+import shutil
 from traj import TrajLoader, TrajSelector, AlignmentCreater, TrajTransformer, TrajAssembler
 from models import MDResultModel, AnalyzedResultModel
 from mdtraj import Trajectory, Topology
 import mdtraj as md
 import numpy as np
+from file import FileCreater
+import os, re, shutil
+from multiprocessing import Pool
+from typing import List, Dict, Tuple
+from settings import Settings
 
 
-class PaCSMD:
+
+class BasePaCSMD:
     def __init__(self, trial: int, initial_file_pathes: List[str], files: List[str], work_dir: str, settings: Settings):
         self.initial_file_pathes = initial_file_pathes
         self.files = files
@@ -32,7 +35,7 @@ class PaCSMD:
     def set_reference_traj(self):
         loader = TrajLoader()
         loader.load(self.initial_file_pathes['input'])
-        self.ref_traj = loader.trajectory
+        self.ref_traj: Trajectory = loader.trajectory
 
     def initial_md(self):
         self.pacs_dir_pathes = []
@@ -85,7 +88,7 @@ class PaCSMD:
 
     def create_md_result(self, traj_objs: Dict[Tuple[int, int, int], Trajectory]) -> MDResultModel:
         alignment_operators = self._create_alignment_operator(traj_objs, self.ref_traj)
-        selected_trajs = self._select_traj(traj_objs, self.ref_traj.topology)
+        selected_trajs = self._select_traj(traj_objs)#self.ref_traj.topology
         transformed_traj_data = self._transform_traj(selected_trajs, alignment_operators)
         assembled_traj_data = self._assemble_traj_data(transformed_traj_data)
         self.md_result = self._get_md_result(assembled_traj_data)
