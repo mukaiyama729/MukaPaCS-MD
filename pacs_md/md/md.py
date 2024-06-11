@@ -1,6 +1,6 @@
 import os, shutil, re
 from command import gmx_command, mpirun_command, mpi_command
-from .md import IMD
+from pacs_md.md import IMD
 from typing import List, Dict, Tuple
 import logging
 logger = logging.getLogger('pacs_md')

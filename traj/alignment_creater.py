@@ -18,7 +18,7 @@ class AlignmentCreater:
     def create(self) -> Dict[Tuple[int, int, int, float], Tuple[np.ndarray, np.ndarray]]:
         logger.info('Create alignments')
         alignments_operators: Dict[Tuple[int, int, int, float], Tuple[np.ndarray, np.ndarray]] = {}
-        for trial, cycle, replica, traj in self.traj_objs.items():
+        for (trial, cycle, replica), traj in self.traj_objs.items():
 
             for time, rotM, transVec in self._alignment(traj):
                 alignments_operators[(trial, cycle, replica, time)] = [rotM, transVec]
@@ -27,6 +27,7 @@ class AlignmentCreater:
         return alignments_operators
 
     def set_ref_structure(self, ref_traj: Trajectory, ref_selection: str='backbone'):
+        logger.info('{}, {}'.format(ref_traj, ref_selection))
         ref_traj = ref_traj.atom_slice(ref_traj.top.select(ref_selection))
         self.ref_structure = ref_traj.xyz[0]
         self.ref_selection = ref_selection

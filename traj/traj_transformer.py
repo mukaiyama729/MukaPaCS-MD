@@ -10,7 +10,7 @@ class TrajTransformer:
         self.traj_objs: Dict[Tuple[int, int, int], List[Trajectory]] = traj_objs
         self.traj_data: Dict[Tuple[int, int, int, float], List[np.ndarray]] = {}
 
-    def transform(self, align_operator: Dict[Tuple[int, int, int, float], List[np.ndarray, np.ndarray]]=dict()):
+    def transform(self, align_operator: Dict[Tuple[int, int, int, float], List[np.ndarray]]=dict()):
         for key, trajs in self.traj_objs.items():
             for time, *structures in zip(trajs[0].time, *[traj.xyz for traj in trajs]):
                 self.traj_data[key + (time,)] = [structure for structure in structures]

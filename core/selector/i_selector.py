@@ -1,8 +1,8 @@
 import abc
 from typing import Dict, Tuple, List
-from models import EvaluatedResultModel, AnalyzedResultModel
+from models import AnalyzedResultModel
 
-class ISelector(metaclass=abc.Meta):
+class ISelector(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def select(self) -> List[Tuple[int, int, int, float]]:
