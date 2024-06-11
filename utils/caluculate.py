@@ -2,7 +2,7 @@ import numpy as np
 
 class Calculater:
 
-    def alignment(target_vec, rotation_matrix, translation_vector) -> np.ndarray:
+    def alignment(self, target_vec, rotation_matrix, translation_vector) -> np.ndarray:
         transformed_vec = np.matmul(target_vec, rotation_matrix.T) + translation_vector
         return transformed_vec
 

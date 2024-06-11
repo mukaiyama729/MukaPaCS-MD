@@ -2,7 +2,7 @@ from mdtraj import Trajectory, Topology
 from typing import Dict, Tuple, List
 import numpy as np
 from numpy import ndarray
-from ..models import MDResultModel
+from models import MDResultModel
 
 
 class TrajAssembler:

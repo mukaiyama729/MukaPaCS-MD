@@ -2,7 +2,7 @@ from mdtraj import Trajectory, Topology
 import mdtraj as md
 import numpy as np
 from typing import Dict, Tuple, List
-from ..utils import Calculater
+from utils import Calculater
 
 
 class AlignmentCreater:
@@ -29,5 +29,5 @@ class AlignmentCreater:
     def _alignment(self, traj: Trajectory):
         target_traj = traj.atom_slice(traj.top.select(self.ref_selection))
         for time, structure in zip(target_traj.time, target_traj.xyz):
-            _, (rotM, transVec) = Calculater.superimpose_coordinates(self.ref_structure, structure)
+            _, (rotM, transVec) = Calculater().superimpose_coordinates(self.ref_structure, structure)
             yield time, rotM, transVec

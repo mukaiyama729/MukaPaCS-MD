@@ -13,7 +13,6 @@ from typing import List, Dict, Tuple
 from settings import Settings
 
 
-
 class BasePaCSMD:
     def __init__(self, trial: int, initial_file_pathes: List[str], files: List[str], work_dir: str, settings: Settings):
         self.initial_file_pathes = initial_file_pathes
@@ -98,7 +97,7 @@ class BasePaCSMD:
         return MDResultModel(result=traj_data, current_state=(self.trial, self.cycle))
 
     def _assemble_traj_data(self, traj_data: Dict[Tuple[int, int, int], List[np.ndarray]]) -> Dict[Tuple[int, int, int, float], List[np.ndarray]]:
-        self.traj_assembler = TrajAssembler(traj_data, max_length=self.settings.max_length)
+        self.traj_assembler = TrajAssembler(traj_data, max_length=self.settings.assemble_max_length)
         return self.traj_assembler.assemble(traj_data)
 
     def _select_traj(self, traj_data: Dict[Tuple[int, int, int], Trajectory]) -> Dict[Tuple[int, int, int], List[Trajectory]]:

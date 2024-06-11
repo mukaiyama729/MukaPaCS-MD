@@ -1,9 +1,6 @@
 from typing import Dict
-from models import EvaluatedResultModel
-from models.analyzed_result_model import AnalyzedResultModel
 from models.phate.phate_analyzed_result_model import PHATEAnalyzedResultModel
 from ..i_evaluater import IEvaluater
-import random
 
 
 class PHATEEvaluter(IEvaluater):

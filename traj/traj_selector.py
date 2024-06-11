@@ -19,5 +19,5 @@ class TrajSelector:
 
         return self.traj_objs
 
-    def _select(self, traj) -> List[Trajectory]:
+    def _select(self, traj: Trajectory) -> List[Trajectory]:
         return [traj.atom_slice(traj.top.select(select)) for select in self._selects]
