@@ -1,1 +1,1 @@
-from phate_analyzed_result_model import PHATEAnalyzedResultModel
+from .phate_analyzed_result_model import PHATEAnalyzedResultModel

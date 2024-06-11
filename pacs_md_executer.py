@@ -20,10 +20,10 @@ class PaCSMDExecuter:
             for pattern in self.settings.patterns:
                 self.copy_files(pattern, self.base_dir, dir_path)
             mode = self.create_mode()
+
+            phate_pacs_md.check_necessary_files(dir_path)
             phate_pacs_md.initialize(
                 trial=i,
-                initial_file_pathes=self.settings.initial_file_pathes,
-                files=self.settings.files,
                 work_dir=dir_path,
                 settings=self.settings
             )

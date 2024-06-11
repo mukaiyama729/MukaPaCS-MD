@@ -22,7 +22,7 @@ class PHATEEvaluter(IEvaluater):
             self.is_continue = False
             return False
 
-    def set_analyzed_result(self, analyzed_result_model: PHATEAnalyzedResultModel) -> None:
+    def set_analyzed_result_model(self, analyzed_result_model: PHATEAnalyzedResultModel) -> None:
         self.analyzed_result_model = analyzed_result_model
 
     def set_configuration(self, configuration: Dict[str, object]) -> None:

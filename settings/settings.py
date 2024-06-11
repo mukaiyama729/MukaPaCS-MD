@@ -10,6 +10,7 @@ class Settings:
         self.config.read(config_file)
         self.base_dir = self.config['PATH']['base_dir']
         self._set_settings()
+        self.total_processes = self.process_per_node * self.node
 
     def _set_settings(self):
         self.set_md_settings()
@@ -18,12 +19,20 @@ class Settings:
 
     def set_md_settings(self):
         for key, value in self.config['CALCULATE'].items():
-            setattr(self, key, value)
+            try:
+                setattr(self, key, int(value))
+            except:
+                setattr(self, key, value)
+                continue
 
     def set_pacs_md(self):
-        for key, value in self.config['PaCS-MD'].items():
-            setattr(self, key, value)
-        self.ref_selection: List[str] = self.ref_selection.split(',')
+        for key, value in self.config['PACSMD'].items():
+            try:
+                setattr(self, key, int(value))
+            except:
+                setattr(self, key, value)
+                continue
+        self.selects: List[str] = self.selects.split(',')
 
     def set_core(self):
         self.core = {}

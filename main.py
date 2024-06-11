@@ -16,7 +16,7 @@ handler.setFormatter(fmt)
 selection_logger.addHandler(handler)
 
 def main():
-    settings = Settings("./config.ini")
+    settings = Settings("/work18/mukaiyama/research/delaunay_md/MukaPaCS-MD/config.ini")
     pacs_md_executer = PaCSMDExecuter(settings.base_dir, settings)
     pacs_md_executer.execute_PaCS_MD()
     print('unko')

@@ -17,7 +17,7 @@ logger = logging.getLogger('pacs_md')
 selection_logger = logging.getLogger('selection')
 
 class BasePaCSMD:
-    def __init__(self, trial: int, initial_file_pathes: List[str], files: List[str], work_dir: str, settings: Settings):
+    def __init__(self, trial: int, initial_file_pathes: Dict[str, str], files: List[str], work_dir: str, settings: Settings):
         self.initial_file_pathes = initial_file_pathes
         self.files = files
         self.work_dir = work_dir
@@ -87,7 +87,7 @@ class BasePaCSMD:
             if match:
                 cyc = int(match.group(1))
                 rep = int(match.group(2))
-                traj_file_path = os.path.join(dir_path, 'traj_comp_noPBC_mol.xtc')
+                traj_file_path = os.path.join(dir_path, 'traj_comp_noPBC.xtc')
                 gro_file_path = self.initial_file_pathes['input']
                 loader = TrajLoader()
                 loader.load(traj_file_path, gro_file_path)
