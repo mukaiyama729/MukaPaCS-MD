@@ -3,6 +3,10 @@ import mdtraj as md
 import numpy as np
 from typing import Dict, Tuple, List
 from utils import Calculater
+import pickle
+import logging
+logger = logging.getLogger('pacs_md')
+
 
 
 class AlignmentCreater:
@@ -12,6 +16,7 @@ class AlignmentCreater:
         self.reff_selection: str = None
 
     def create(self) -> Dict[Tuple[int, int, int, float], Tuple[np.ndarray, np.ndarray]]:
+        logger.info('Create alignments')
         alignments_operators: Dict[Tuple[int, int, int, float], Tuple[np.ndarray, np.ndarray]] = {}
         for trial, cycle, replica, traj in self.traj_objs.items():
 

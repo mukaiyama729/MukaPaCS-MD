@@ -1,6 +1,8 @@
 from pacs_md.methods import BasePaCSMD
 from typing import List, Dict
 from settings import Settings
+import logging
+logger = logging.getLogger('pacs_md')
 
 class PHATEPaCSMD(BasePaCSMD):
     def __init__(self):
@@ -15,6 +17,7 @@ class PHATEPaCSMD(BasePaCSMD):
             work_dir=work_dir,
             settings=settings
         )
+        logger.info('Initialize {}'.format(self._name))
 
     def set_mode(self, mode: Dict[str, object]):
         self.set_md(mode['md'])
@@ -22,6 +25,7 @@ class PHATEPaCSMD(BasePaCSMD):
         self.set_reference_traj()
 
     def run(self):
+        logger.info('Run {}'.format(self._name))
         self.execute()
 
 phate_pacs_md = PHATEPaCSMD()

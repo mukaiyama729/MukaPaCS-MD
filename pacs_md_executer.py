@@ -1,9 +1,11 @@
 import os, shutil, glob
-from pacs_md import phate_pacs_md
+from pacs_md.methods import phate_pacs_md
 from pacs_md.md import MD
 from core.evaluater.phate.phate_evaluater import PHATEEvaluter
 from core.analyzer.phate.phate_analyzer import PHATEAnalyzer
 from core.selector.phate.phate_selector import PHATESelector
+import logging
+logger = logging.getLogger('pacs_md')
 
 class PaCSMDExecuter:
 
@@ -36,11 +38,14 @@ class PaCSMDExecuter:
                 'analyzer': PHATEAnalyzer(),
                 'selector': PHATESelector(),
             }
+        logger.info('Mode: {}'.format(mode))
         return mode
 
     def make_dir(self, dir, exist=True):
+        logger.info('Make directory: {}'.format(dir))
         os.makedirs(dir, exist_ok=exist)
 
     def copy_files(self, pattern, dir1, dir2):
         for file_path in glob.glob(os.path.join(dir1, pattern)):
+            logger.info('Copy {} to {}'.format(file_path, dir2))
             shutil.copyfile(file_path, os.path.join(dir2, os.path.basename(file_path)))

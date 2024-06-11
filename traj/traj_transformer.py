@@ -28,4 +28,4 @@ class TrajTransformer:
 
     def _align_traj(self, align_operator: Dict[Tuple[int, int, int, float], List[np.ndarray]]):
         for key, (rotM, transVec) in align_operator.items():
-            self.traj_data[key] = [Calculater.alignment(structure, rotM, transVec) for structure in self.traj_data[key]]
+            self.traj_data[key] = [Calculater().alignment(structure, rotM, transVec) for structure in self.traj_data[key]]

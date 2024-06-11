@@ -1,6 +1,8 @@
 from command import gmx_command
 import os
 import shutil
+import logging
+logger = logging.getLogger('pacs_md')
 
 class FileCreater:
 
@@ -9,6 +11,7 @@ class FileCreater:
         self.from_dir = to_dir if from_dir == None else from_dir
 
     def create_tpr_file(self, tpr_file_name, initial_files: dict, initial_files_path):
+        logger.info('Create tpr file')
         os.system(
             self.tpr_command(
                 tpr_file_name,
@@ -32,9 +35,11 @@ class FileCreater:
             ' -r ' + ref_file_path +
             ' -maxwarn 10'
         )
+        logger.info('Command: {}'.format(command))
         return command
 
     def create_input_file(self, initial_files, time):
+        logger.info('Create input file')
         os.system(
             self.input_command(initial_files, time)
         )
@@ -48,6 +53,7 @@ class FileCreater:
             ' -o ' + os.path.join(self.to_dir, initial_files['input']) +
             ' -dump ' + str(float(time))
         )
+        logger.info('Command: {}'.format(command))
         return command
 
     def create_noPBC_xtc(self, index_file_path, stdin='System'):
@@ -60,6 +66,7 @@ class FileCreater:
             ' -o ' + os.path.join(self.to_dir, 'traj_comp_noPBC_mol.xtc') +
             ' -pbc mol'
         )
+        logger.info('Command: {}'.format(command))
         os.system(command)
 
         second_command = (
@@ -71,12 +78,15 @@ class FileCreater:
             ' -o ' + os.path.join(self.to_dir, 'traj_comp_noPBC.xtc') +
             ' -pbc nojump'
         )
+        logger.info('Command: {}'.format(second_command))
         os.system(second_command)
         os.remove(os.path.join(self.to_dir, 'traj_comp_noPBC_mol.xtc'))
+        logger.info('Remove {}'.format(os.path.join(self.to_dir, 'traj_comp_noPBC_mol.xtc')))
 
     def create_dir(self, dir_name):
         path = os.path.join(self.to_dir, dir_name)
         os.makedirs(path, exist_ok=True)
+        logger.info('Create directory: {}'.format(path))
         return path
 
     def create_dirs_for_pacs(self, dir_name, nbins) -> list:
@@ -84,13 +94,17 @@ class FileCreater:
         for i in range(nbins):
             name = dir_name + '-{}'.format(i)
             pathes.append(self.create_dir(name))
+        logger.info('Pathes: {}'.format(pathes))
         return pathes
 
     def change_from_dir(self, from_dir):
         self.from_dir = from_dir
+        logger.info('Change from_dir: {}'.format(self.from_dir))
 
     def change_to_dir(self, to_dir):
         self.to_dir = to_dir
+        logger.info('Change to_dir: {}'.format(self.to_dir))
 
     def copy_file(self, file_name):
         shutil.copy(os.path.join(self.from_dir, file_name), self.to_dir)
+        logger.info('Copy {} to {}'.format(file_name, self.to_dir))

@@ -2,6 +2,8 @@ import os, shutil, re
 from command import gmx_command, mpirun_command, mpi_command
 from .md import IMD
 from typing import List, Dict, Tuple
+import logging
+logger = logging.getLogger('pacs_md')
 
 
 class MD(IMD):
@@ -11,8 +13,10 @@ class MD(IMD):
 
     def single_md(self, total_process: int, threads_per_process: int, use_gpu: bool):
         if use_gpu:
+            logger.info('Execute MD with GPU')
             os.system(self._execute_gpu_command(total_process, threads_per_process))
         else:
+            logger.info('Execute MD with CPU')
             os.system(self._execute_cpu_command(total_process, threads_per_process))
 
     def _execute_gpu_command(self, total_process: int, threads_per_process: int):
@@ -29,6 +33,7 @@ class MD(IMD):
             ' -pme ' + 'gpu' +
             " -v -ntomp " + str(threads_per_process)
         )
+        logger.info('Command: {}'.format(command))
         return command
 
     def _execute_cpu_command(self, total_process: int, threads_per_process: int):
@@ -44,6 +49,7 @@ class MD(IMD):
             ' -cpo ' + os.path.join(self.output_dir, 'state.cpt') +
             " -v -ntomp " + str(threads_per_process)
         )
+        logger.info('Command: {}'.format(command))
         return command
 
     def multi_md(self, parallel: int, multi_dir_pathes: List[str], total_process: int, threads_per_process: int, use_gpu: bool):
@@ -90,10 +96,13 @@ class MD(IMD):
             ' -v ' +
             ' -ntomp ' + str(threads_per_process)
         )
+        logger.info('Command: {}'.format(command))
         return command
 
     def set_input_dir(self, input_dir: str) -> None:
+        logger.info('Set input directory: {}'.format(input_dir))
         self.input_dir = input_dir
 
     def set_output_dir(self, output_dir: str) -> None:
+        logger.info('Set output directory: {}'.format(output_dir))
         self.output_dir = output_dir
