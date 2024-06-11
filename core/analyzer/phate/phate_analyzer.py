@@ -4,6 +4,8 @@ from models import MDResultModel, AnalyzedResultModel
 from models.phate import PHATEAnalyzedResultModel
 import phate
 import numpy as np
+import logging
+logger = logging.getLogger('pacs_md')
 
 class PHATEAnalyzer(IAnalyzer):
     def __init__(self):
@@ -19,12 +21,13 @@ class PHATEAnalyzer(IAnalyzer):
         self.analyzed_result = None
 
     def analyze(self) -> PHATEAnalyzedResultModel:
-        self.phate_operator = phate.PHATE(n_components=self.n_components, knn=self.knn)
+        self.phate_operator = phate.PHATE(n_components=self.n_components, knn=self.knn, decay=self.alpha_decay)
         current_state = self.md_result.current_state
         if self.target_cycles == 1:
             result = self.md_result.get_current_result()
         else:
             result = self.md_result.result()
+        logger.info('result: {}'.format(result))
 
         #複数のList[np.ndarray]を一つのnp.ndarrayに変換
         traj = np.array(list(result.values())).reshape(len(result), -1)
@@ -35,15 +38,14 @@ class PHATEAnalyzer(IAnalyzer):
         eigen_centrals = np.asarray(self.cal_eigenvector_centrality())
         sorted_centrals = np.argsort(eigen_centrals).flatten()
 
-        max_indices = []
-        min_indices = []
+        distinct_indices = []
         eigen_values, eigen_vectors = self.cal_eigenvectors()
 
         for eigen_vec in eigen_vectors.T[:]:
-            max_indices += list(np.argsort(eigen_vec)[-1:])
-            min_indices += list(np.argsort(eigen_vec[:1]))
-
-        distinct_indices = list(set(max_indices).union(set(min_indices)))
+            distinct_indices.append(np.argsort(eigen_vec)[-1])
+            distinct_indices.append(np.argsort(eigen_vec)[0])
+        logger.info('distinct_indices: {},'.format(distinct_indices))
+        distinct_indices = list(set(distinct_indices))
         top_low_centrals = sorted_centrals[:self.max_centrals]
         self.distinct_low_centrals = list(set(top_low_centrals) & set(distinct_indices))
 
@@ -53,12 +55,10 @@ class PHATEAnalyzer(IAnalyzer):
             max_centrals=self.max_centrals,
             eigen_centrals=eigen_centrals,
             sorted_centrals=sorted_centrals,
-            max_indices=max_indices,
-            min_indices=min_indices,
             eigen_values=eigen_values,
             eigen_vectors=eigen_vectors,
             top_low_centrals=top_low_centrals,
-            distict_indices=distinct_indices,
+            distinct_indices=distinct_indices,
             distinct_low_centrals=self.distinct_low_centrals
         )
 
@@ -70,7 +70,7 @@ class PHATEAnalyzer(IAnalyzer):
         for key, result in zip(used_md_results.keys(), self.analyzed_result):
             analyzed_result[key] = result
 
-        return PHATEAnalyzedResultModel(self.analyzed_result, current_state).from_map(kwargs)
+        return PHATEAnalyzedResultModel(analyzed_result, current_state).from_map(kwargs)
 
     def cal_eigenvector_centrality(self):
         def spectral_radius(M):
@@ -87,7 +87,7 @@ class PHATEAnalyzer(IAnalyzer):
         return e / np.sum(e)
 
     def cal_eigenvectors(self) -> Tuple[np.ndarray, np.ndarray]:
-        diff_op = np.asanyarray(self.phate_operator.graph.diff_op.todense())
+        diff_op = np.asarray(self.phate_operator.graph.diff_op.todense())
         eigen_values, eigen_vectors = np.linalg.eig(diff_op)
         return eigen_values, eigen_vectors
 

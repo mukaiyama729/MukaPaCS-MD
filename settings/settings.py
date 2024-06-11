@@ -10,7 +10,7 @@ class Settings:
         self.config.read(config_file)
         self.base_dir = self.config['PATH']['base_dir']
         self._set_settings()
-        self.total_processes = self.process_per_node * self.node
+        self.total_processes = int(self.process_per_node * self.node)
 
     def _set_settings(self):
         self.set_md_settings()
@@ -24,6 +24,7 @@ class Settings:
             except:
                 setattr(self, key, value)
                 continue
+        self.use_gpu: bool = bool(self.use_gpu)
 
     def set_pacs_md(self):
         for key, value in self.config['PACSMD'].items():
@@ -36,7 +37,7 @@ class Settings:
 
     def set_core(self):
         self.core = {}
-        self.core['analyzer'] = dict(self.config['PHATEANALYZER'].items())
-        self.core['evaluater'] = dict(self.config['PHATEEVALUATER'].items())
-        self.core['selector'] = dict(self.config['PHATESELECTOR'].items())
+        self.core['analyzer'] = { key: int(value) for key, value in self.config['PHATEANALYZER'].items() }
+        self.core['evaluater'] = { key: int(value) for key, value in self.config['PHATEEVALUATER'].items() }
+        self.core['selector'] = { key: int(value) for key, value in self.config['PHATESELECTOR'].items() }
 
