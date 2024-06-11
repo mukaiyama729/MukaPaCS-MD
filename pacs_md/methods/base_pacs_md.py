@@ -108,6 +108,7 @@ class BasePaCSMD:
         logger.info('Assembled traj data: {}'.format(assembled_traj_data))
 
         self.md_result = self._get_md_result(assembled_traj_data)
+        logger.info('md result: {}'.format(self.md_result))
         return self.md_result
 
     def _get_md_result(self, traj_data: Dict[Tuple[int, int, int, float], List[np.ndarray]]) -> MDResultModel:
@@ -164,6 +165,7 @@ class BasePaCSMD:
             multi_dir_pathes=self.pacs_dir_pathes,
             total_process=self.settings.total_processes,
             threads_per_process=self.settings.threads_per_process,
+            use_gpu=self.settings.use_gpu
             )
 
     def execute(self):

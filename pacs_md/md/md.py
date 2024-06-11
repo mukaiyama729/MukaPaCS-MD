@@ -85,6 +85,7 @@ class MD(IMD):
             ' -npme ' + '1' +
             ' -ntomp ' + str(threads_per_process)
         )
+        logger.info('GPU multi command: {}'.format(command))
         return command
 
     def execute_cpu_multi_command(self, multi_dir_pathes: str, total_process: int, threads_per_process: int):
