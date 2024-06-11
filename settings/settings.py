@@ -1,4 +1,5 @@
 import configparser
+from typing import List
 
 class Settings:
     file_to_pattern = { 'topol': 'topol*.top', 'index': 'index*.ndx', 'input': 'input*.gro', 'md': 'md*.mdp', 'posres': '*.itp', 'sel': 'sel.dat' }
@@ -22,6 +23,7 @@ class Settings:
     def set_pacs_md(self):
         for key, value in self.config['PaCS-MD'].items():
             setattr(self, key, value)
+        self.ref_selection: List[str] = self.ref_selection.split(',')
 
     def set_core(self):
         self.core = {}

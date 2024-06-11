@@ -124,7 +124,7 @@ class BasePaCSMD:
 
     def _create_alignment_operator(self, traj_data: Dict[Tuple[int, int, int], Trajectory], ref_traj: Trajectory) -> Dict[Tuple[int, int, int, float], Tuple[ndarray, ndarray]]:
         alignment_creater = AlignmentCreater(traj_data)
-        alignment_creater.set_ref_structure(ref_traj)
+        alignment_creater.set_ref_structure(ref_traj, ref_selection=self.settings.ref_selection)
         return alignment_creater.create()
 
     def _transform_traj(self, traj_objs: Dict[Tuple[int, int, int], List[Trajectory]], alignment_operators: Dict[Tuple[int, int, int, float], List[np.ndarray]]) -> Dict[Tuple[int, int, int, float], List[ndarray]]:
