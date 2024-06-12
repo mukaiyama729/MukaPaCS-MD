@@ -170,7 +170,7 @@ class BasePaCSMD:
 
     def execute(self):
         self.initial_md()
-        self.create_traj_files(prallel=True)
+        self.create_traj_files(prallel=bool(self.settings.create_file_parallel))
         self.create_md_result(self.make_traj_objs(self.pacs_dir_pathes))
         analyzed_result_model = self._execute_analyze()
         self._update_ranked_traj_list(analyzed_result_model)

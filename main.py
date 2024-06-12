@@ -2,17 +2,18 @@ from settings import Settings
 from pacs_md_executer import PaCSMDExecuter
 import logging
 import argparse
+import os
 
 logger = logging.getLogger('pacs_md')
 logger.setLevel(logging.DEBUG)
-handler = logging.FileHandler('./pacs_log.log')
+handler = logging.FileHandler(os.path.join(os.getcwd(), 'pacs_log.log'))
 fmt = logging.Formatter('%(asctime)s %(message)s')
 handler.setFormatter(fmt)
 logger.addHandler(handler)
 
 selection_logger = logging.getLogger('selection')
 selection_logger.setLevel(logging.DEBUG)
-handler = logging.FileHandler('./selection_log.log')
+handler = logging.FileHandler(os.path.join(os.getcwd(), 'selection_log.log'))
 fmt = logging.Formatter('%(asctime)s %(message)s')
 handler.setFormatter(fmt)
 selection_logger.addHandler(handler)
