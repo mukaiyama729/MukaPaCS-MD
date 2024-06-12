@@ -2,6 +2,7 @@ from settings import Settings
 from pacs_md_executer import PaCSMDExecuter
 import logging
 import argparse
+
 logger = logging.getLogger('pacs_md')
 logger.setLevel(logging.DEBUG)
 handler = logging.FileHandler('./pacs_log.log')
@@ -22,7 +23,7 @@ def main(parser):
     arg = parser.parse_args()
     arranged_args = { k: v for k, v in vars(arg).items() if v is not None }
 
-    settings = Settings(arrange_args['config_path'])
+    settings = Settings(arranged_args['config_path'])
     pacs_md_executer = PaCSMDExecuter(settings.base_dir, settings)
     pacs_md_executer.execute_PaCS_MD()
 
