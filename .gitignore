@@ -12,3 +12,4 @@ __pycache__/
 *.cpython
 .vscode
 *.ipynb
+*.swp

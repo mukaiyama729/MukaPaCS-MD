@@ -13,6 +13,9 @@ from multiprocessing import Pool
 from typing import List, Dict, Tuple
 from settings import Settings
 import logging
+import pickle
+import copy
+
 logger = logging.getLogger('pacs_md')
 selection_logger = logging.getLogger('selection')
 
@@ -109,10 +112,14 @@ class BasePaCSMD:
 
         self.md_result = self._get_md_result(assembled_traj_data)
         logger.info('md result: {}'.format(self.md_result))
+
+        del alignment_operators, selected_trajs, transformed_traj_data, assembled_traj_data
         return self.md_result
 
     def _get_md_result(self, traj_data: Dict[Tuple[int, int, int, float], List[np.ndarray]]) -> MDResultModel:
-        return MDResultModel(result=traj_data, current_state=(self.trial, self.cycle))
+        copied_traj_data = copy.deepcopy(traj_data)
+        del traj_data
+        return MDResultModel(result=copied_traj_data, current_state=(self.trial, self.cycle))
 
     def _assemble_traj_data(self, traj_data: Dict[Tuple[int, int, int], List[np.ndarray]]) -> Dict[Tuple[int, int, int, float], List[ndarray]]:
         self.traj_assembler = TrajAssembler(traj_data, max_length=self.settings.assemble_max_length)
@@ -176,13 +183,35 @@ class BasePaCSMD:
         self._update_ranked_traj_list(analyzed_result_model)
         self.cycle += 1
         while self.cycle <= self.settings.cycle_limit:
-            self.prepare_for_md()
-            self.parallel_md()
-            self.create_traj_files(prallel=True)
-            self.create_md_result(self.make_traj_objs(self.pacs_dir_pathes))
-            analyzed_result_model = self._execute_analyze()
-            is_continued = self._is_continued(analyzed_result_model)
-            if not is_continued:
-                break
+            try:
+                self.prepare_for_md()
+                self.parallel_md()
+                self.create_traj_files(prallel=bool(self.settings.create_file_parallel))
+                self.create_md_result(self.make_traj_objs(self.pacs_dir_pathes))
+                analyzed_result_model = self._execute_analyze()
+                is_continued = self._is_continued(analyzed_result_model)
+                if not is_continued:
+                    break
+            except Exception as e:
+                logger.error('Error: {}'.format(e))
+                raise e
+            self._update_ranked_traj_list(analyzed_result_model)
+            self.cycle += 1
+
+    def restart(self):
+
+        while self.cycle <= self.settings.cycle_limit:
+            try:
+                self.prepare_for_md()
+                self.parallel_md()
+                self.create_traj_files(prallel=True)
+                self.create_md_result(self.make_traj_objs(self.pacs_dir_pathes))
+                analyzed_result_model = self._execute_analyze()
+                is_continued = self._is_continued(analyzed_result_model)
+                if not is_continued:
+                    break
+            except Exception as e:
+                logger.error('Error: {}'.format(e))
+                raise e
             self._update_ranked_traj_list(analyzed_result_model)
             self.cycle += 1
