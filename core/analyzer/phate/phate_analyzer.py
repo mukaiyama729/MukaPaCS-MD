@@ -54,7 +54,10 @@ class PHATEAnalyzer(IAnalyzer):
             top_low_centrals = sorted_centrals[:self.max_centrals]
             self.distinct_low_centrals = list(set(top_low_centrals) & set(distinct_indices))
         else:
-            self.distinct_low_centrals = sorted_centrals[:self.max_centrals]
+            eigen_values = None
+            eigen_vectors = None
+            top_low_centrals = sorted_centrals[:self.max_centrals]
+            self.distinct_low_centrals = top_low_centrals
 
         logger.info('distinct low centrals: {},'.format(self.distinct_low_centrals))
         phate_analyzed_result_model = self.create_analyzed_result_model(

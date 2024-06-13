@@ -145,6 +145,7 @@ class BasePaCSMD:
         if prallel:
             p = Pool(self.settings.total_processes)
             p.map(self._worker, self.pacs_dir_pathes)
+            p.close()
         else:
             for pacs_dir_path in self.pacs_dir_pathes:
                 FileCreater(to_dir=pacs_dir_path, from_dir=pacs_dir_path).create_noPBC_xtc(self.initial_file_pathes['index'])
