@@ -5,6 +5,7 @@ from models.phate import PHATEAnalyzedResultModel
 import phate
 import numpy as np
 import logging
+from scipy.sparse.linalg import eigs
 logger = logging.getLogger('pacs_md')
 
 class PHATEAnalyzer(IAnalyzer):
@@ -19,6 +20,8 @@ class PHATEAnalyzer(IAnalyzer):
         self.max_centrals = 50
         self.authority = False
         self.analyzed_result = None
+        self.use_distinct_indices = False
+        self.use_approximation = True
 
     def analyze(self) -> PHATEAnalyzedResultModel:
         self.phate_operator = phate.PHATE(n_components=self.n_components, knn=self.knn, decay=self.alpha_decay)
@@ -37,18 +40,26 @@ class PHATEAnalyzer(IAnalyzer):
 
         eigen_centrals = np.asarray(self.cal_eigenvector_centrality())
         sorted_centrals = np.argsort(eigen_centrals).flatten()
+        logger.info('sorted centrals: {}'.format(sorted_centrals))
 
         distinct_indices = []
-        eigen_values, eigen_vectors = self.cal_eigenvectors()
+        if self.use_distinct_indices:
+            eigen_values, eigen_vectors = self.cal_eigenvectors()
 
-        for eigen_vec in eigen_vectors.T[:]:
-            distinct_indices.append(np.argsort(eigen_vec)[-1])
-            distinct_indices.append(np.argsort(eigen_vec)[0])
-        logger.info('distinct_indices: {},'.format(distinct_indices))
-        distinct_indices = list(set(distinct_indices))
-        top_low_centrals = sorted_centrals[:self.max_centrals]
-        self.distinct_low_centrals = list(set(top_low_centrals) & set(distinct_indices))
+            for eigen_vec in eigen_vectors.T[:]:
+                distinct_indices.append(np.argsort(eigen_vec)[-1])
+                distinct_indices.append(np.argsort(eigen_vec)[0])
 
+            distinct_indices = list(set(distinct_indices))
+            top_low_centrals = sorted_centrals[:self.max_centrals]
+            self.distinct_low_centrals = list(set(top_low_centrals) & set(distinct_indices))
+        else:
+            eigen_values = None
+            eigen_vectors = None
+            top_low_centrals = sorted_centrals[:self.max_centrals]
+            self.distinct_low_centrals = top_low_centrals
+
+        logger.info('distinct low centrals: {},'.format(self.distinct_low_centrals))
         phate_analyzed_result_model = self.create_analyzed_result_model(
             result,
             current_state,
@@ -77,13 +88,17 @@ class PHATEAnalyzer(IAnalyzer):
             """
             Compute the spectral radius of M.
             """
+            if self.use_approximation:
+                eigenvalue, _ = eigs(A_temp, k=1, which='LM')
+                max_abs_eigenvalue = np.abs(eigenvalue[0])
+                return max_abs_eigenvalue
             return np.max(np.abs(np.linalg.eigvals(M)))
 
         affinity_matrix = self.phate_operator.graph.diff_aff.todense()
         A_temp = affinity_matrix.T if self.authority else affinity_matrix
         n = len(A_temp)
-        spectral_radius = spectral_radius(A_temp)
-        e = spectral_radius**(-self.num_powered_iterations) * (np.linalg.matrix_power(A_temp, self.num_powered_iterations) @ np.ones(n))
+        r = spectral_radius(A_temp)
+        e = r**(-self.num_powered_iterations) * (np.linalg.matrix_power(A_temp, self.num_powered_iterations) @ np.ones(n))
         return e / np.sum(e)
 
     def cal_eigenvectors(self) -> Tuple[np.ndarray, np.ndarray]:
@@ -101,3 +116,5 @@ class PHATEAnalyzer(IAnalyzer):
         self.n_components = configuration['n_components'] if configuration['n_components'] is not None else self.n_components
         self.num_powered_iterations = configuration['num_powered_iterations'] if configuration['num_powered_iterations'] is not None else self.num_powered_iterations
         self.max_centrals = configuration['max_centrals'] if configuration['max_centrals'] is not None else self.max_centrals
+        self.use_distinct_indices = configuration['use_distinct_indices'] if configuration['use_distinct_indices'] is not None else self.use_distinct_indices
+        self.use_approximation = configuration['use_approximation'] if configuration['use_approximation'] is not None else self.use_approximation

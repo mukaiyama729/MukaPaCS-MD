@@ -5,7 +5,6 @@ import logging
 logger = logging.getLogger('pacs_md')
 
 class FileCreater:
-
     def __init__(self, to_dir, from_dir=None):
         self.to_dir = to_dir
         self.from_dir = to_dir if from_dir == None else from_dir

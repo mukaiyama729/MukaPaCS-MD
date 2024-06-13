@@ -3,6 +3,7 @@ from typing import List, Dict
 from settings import Settings
 import logging
 import glob, shutil, os
+import pickle
 logger = logging.getLogger('pacs_md')
 
 
@@ -50,10 +51,37 @@ class PHATEPaCSMD(BasePaCSMD):
                 self.file_pathes = files[0]
                 self.files = os.path.basename(files[0])
             else:
-                raise FileError
+                raise FileNotFoundError('File not found: {}'.format(file_name))
 
     def run(self):
         logger.info('Run {}'.format(self._name))
-        self.execute()
+        try:
+            self.execute()
+        except Exception as e:
+            logger.error(e)
+            self.save_instance()
+        self.save_instance()
+
+
+    def rerun(self):
+        logger.info('Run {}'.format(self._name))
+        try:
+            self.restart()
+        except Exception as e:
+            logger.error(e)
+            self.save_instance()
+        self.save_instance()
+
+
+    def save_instance(self) -> None:
+        logger.info('Save instance')
+        logger.info('Save instance to {}'.format(self.work_dir))
+        with open(os.path.join(self.work_dir, 'instance-trial-{}.pickle'.format(self.trial)), 'wb') as f:
+            pickle.dump(self, f)
+
+    @classmethod
+    def load_instance(cls, instance_path: str) -> "cls":
+        with open(instance_path, 'rb') as f:
+            return pickle.load(f)
 
 phate_pacs_md = PHATEPaCSMD()

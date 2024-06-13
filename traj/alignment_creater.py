@@ -8,7 +8,6 @@ import logging
 logger = logging.getLogger('pacs_md')
 
 
-
 class AlignmentCreater:
     def __init__(self, traj_objs):
         self.traj_objs: Dict[Tuple[int, int, int], Trajectory] = traj_objs
