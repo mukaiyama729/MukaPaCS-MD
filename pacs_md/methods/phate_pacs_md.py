@@ -75,6 +75,7 @@ class PHATEPaCSMD(BasePaCSMD):
 
     def save_instance(self) -> None:
         logger.info('Save instance')
+        logger.info('Save instance to {}'.format(self.work_dir))
         with open(os.path.join(self.work_dir, 'instance-trial-{}.pickle'.format(self.trial)), 'wb') as f:
             pickle.dump(self, f)
 

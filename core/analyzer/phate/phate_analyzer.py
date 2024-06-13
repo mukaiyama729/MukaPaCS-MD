@@ -94,8 +94,8 @@ class PHATEAnalyzer(IAnalyzer):
         affinity_matrix = self.phate_operator.graph.diff_aff.todense()
         A_temp = affinity_matrix.T if self.authority else affinity_matrix
         n = len(A_temp)
-        spectral_radius = spectral_radius(A_temp)
-        e = spectral_radius**(-self.num_powered_iterations) * (np.linalg.matrix_power(A_temp, self.num_powered_iterations) @ np.ones(n))
+        r = spectral_radius(A_temp)
+        e = r**(-self.num_powered_iterations) * (np.linalg.matrix_power(A_temp, self.num_powered_iterations) @ np.ones(n))
         return e / np.sum(e)
 
     def cal_eigenvectors(self) -> Tuple[np.ndarray, np.ndarray]:
