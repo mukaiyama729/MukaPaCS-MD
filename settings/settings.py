@@ -10,7 +10,6 @@ class Settings:
         self.config.read(config_file)
         self.base_dir = self.config['PATH']['base_dir']
         self._set_settings()
-        self.total_processes = int(self.process_per_node * self.node)
 
     def _set_settings(self):
         self.set_md_settings()
@@ -18,26 +17,36 @@ class Settings:
         self.set_core()
 
     def set_md_settings(self):
+        self.process_per_node = -1
+        self.node = -1
         for key, value in self.config['CALCULATE'].items():
             try:
                 setattr(self, key, int(value))
-            except:
+            except ValueError as e:
+                print(e)
                 setattr(self, key, value)
                 continue
-        self.use_gpu: bool = bool(self.use_gpu)
+            except Exception as e:
+                print(e)
+                continue
+        self.total_processes = self.process_per_node * self.node
 
     def set_pacs_md(self):
         for key, value in self.config['PACSMD'].items():
             try:
                 setattr(self, key, int(value))
-            except:
+            except ValueError as e:
+                print(e)
                 setattr(self, key, value)
+                continue
+            except Exception as e:
+                print(e)
                 continue
         self.selects: List[str] = self.selects.split(',')
 
     def set_core(self):
         self.core = {}
-        self.core['analyzer'] = { key: int(value) for key, value in self.config['PHATEANALYZER'].items() }
-        self.core['evaluater'] = { key: int(value) for key, value in self.config['PHATEEVALUATER'].items() }
-        self.core['selector'] = { key: int(value) for key, value in self.config['PHATESELECTOR'].items() }
+        self.core['analyzer'] = dict(self.config['PHATEANALYZER'].items())
+        self.core['evaluater'] = dict(self.config['PHATEEVALUATER'].items())
+        self.core['selector'] = dict(self.config['PHATESELECTOR'].items())
 

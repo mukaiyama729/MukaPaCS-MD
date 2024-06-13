@@ -1,5 +1,5 @@
 import os, shutil, glob
-from pacs_md.methods import phate_pacs_md
+from pacs_md.methods import PHATEPaCSMD, phate_pacs_md
 from pacs_md.md import MD
 from core.evaluater.phate.phate_evaluater import PHATEEvaluter
 from core.analyzer.phate.phate_analyzer import PHATEAnalyzer
@@ -14,21 +14,42 @@ class PaCSMDExecuter:
         self.settings = settings
 
     def execute_PaCS_MD(self):
-        for i in range(1, self.settings.how_many+1, 1):
-            dir_path = os.path.join(self.base_dir, 'trial{}'.format(i))
-            self.make_dir(dir_path)
-            for pattern in self.settings.patterns:
-                self.copy_files(pattern, self.base_dir, dir_path)
-            mode = self.create_mode()
+        if self.settings.restart:
+            instance: PHATEPaCSMD = PHATEPaCSMD.load_instance(self.settings.instance_path)
+            instance.rerun()
+            if instance.trial >= self.settings.how_many:
+                return
 
-            phate_pacs_md.check_necessary_files(dir_path)
-            phate_pacs_md.initialize(
-                trial=i,
-                work_dir=dir_path,
-                settings=self.settings
-            )
-            phate_pacs_md.set_mode(mode)
-            phate_pacs_md.run()
+            for i in range(instance.trial+1, self.settings.how_may+1, 1):
+                dir_path = os.path.join(self.base_dir, 'trial{}'.format(i))
+                self.make_dir(dir_path)
+                for pattern in self.settings.patterns:
+                    self.copy_files(pattern, self.base_dir, dir_path)
+                mode = self.create_mode()
+                phate_pacs_md.check_necessary_files(dir_path)
+                phate_pacs_md.initialize(
+                    trial=i,
+                    work_dir=dir_path,
+                    settings=self.settings
+                )
+                phate_pacs_md.set_mode(mode)
+                phate_pacs_md.run()
+        else:
+            for i in range(1, self.settings.how_many+1, 1):
+                dir_path = os.path.join(self.base_dir, 'trial{}'.format(i))
+                self.make_dir(dir_path)
+                for pattern in self.settings.patterns:
+                    self.copy_files(pattern, self.base_dir, dir_path)
+                mode = self.create_mode()
+
+                phate_pacs_md.check_necessary_files(dir_path)
+                phate_pacs_md.initialize(
+                    trial=i,
+                    work_dir=dir_path,
+                    settings=self.settings
+                )
+                phate_pacs_md.set_mode(mode)
+                phate_pacs_md.run()
 
     def create_mode(self):
         if self.settings.mode == 'phate':
