@@ -91,9 +91,14 @@ class PHATEAnalyzer(IAnalyzer):
             Compute the spectral radius of M.
             """
             if self.use_approximation:
-                eigenvalue, _ = eigs(A_temp, k=1, which='LM')
-                max_abs_eigenvalue = np.abs(eigenvalue[0])
-                return max_abs_eigenvalue
+                try:
+                    eigenvalue, _ = eigs(A_temp, k=1, which='LM')
+                    max_abs_eigenvalue = np.abs(eigenvalue[0])
+                    return max_abs_eigenvalue
+                except Exception as e:
+                    print(e)
+                    logger.info('Error has happened: {}'.format(e))
+                    return np.max(np.abs(np.linalg.eigvals(M)))
             return np.max(np.abs(np.linalg.eigvals(M)))
 
         affinity_matrix = self.phate_operator.graph.diff_aff.todense()
