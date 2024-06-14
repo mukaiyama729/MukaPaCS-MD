@@ -46,7 +46,7 @@ class Settings:
 
     def set_core(self):
         self.core = {}
-        self.core['analyzer'] = { key: int(value) for key, value in self.config['PHATEANALYZER'].items() }
-        self.core['evaluater'] = { key: int(value) for key, value in self.config['PHATEEVALUATER'].items() }
-        self.core['selector'] = { key: int(value) for key, value in self.config['PHATESELECTOR'].items() }
+        self.core['analyzer'] = { key: int(value) if value.isdigit() else value for key, value in self.config['PHATEANALYZER'].items() }
+        self.core['evaluater'] = { key: int(value) if value.isdigit() else value for key, value in self.config['PHATEEVALUATER'].items() }
+        self.core['selector'] = { key: int(value) if value.isdigit() else value for key, value in self.config['PHATESELECTOR'].items() }
 

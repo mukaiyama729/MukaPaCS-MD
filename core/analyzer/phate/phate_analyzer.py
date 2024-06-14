@@ -22,6 +22,8 @@ class PHATEAnalyzer(IAnalyzer):
         self.analyzed_result = None
         self.use_distinct_indices = False
         self.use_approximation = True
+        self.which = 'LM'
+        self.how_many_eigs = 100
 
     def analyze(self) -> PHATEAnalyzedResultModel:
         self.phate_operator = phate.PHATE(n_components=self.n_components, knn=self.knn, decay=self.alpha_decay)
@@ -39,7 +41,7 @@ class PHATEAnalyzer(IAnalyzer):
         self.analyzed_result = self.phate_operator.fit_transform(traj_data)
 
         eigen_centrals = np.asarray(self.cal_eigenvector_centrality())
-        sorted_centrals = np.argsort(eigen_centrals).flatten()
+        sorted_centrals = list(np.argsort(eigen_centrals).flatten())
         logger.info('sorted centrals: {}'.format(sorted_centrals))
 
         distinct_indices = []
@@ -52,7 +54,7 @@ class PHATEAnalyzer(IAnalyzer):
 
             distinct_indices = list(set(distinct_indices))
             top_low_centrals = sorted_centrals[:self.max_centrals]
-            self.distinct_low_centrals = list(set(top_low_centrals) & set(distinct_indices))
+            self.distinct_low_centrals = self._create_distict_low_centrals(distinct_indices, sorted_centrals)
         else:
             eigen_values = None
             eigen_vectors = None
@@ -103,8 +105,21 @@ class PHATEAnalyzer(IAnalyzer):
 
     def cal_eigenvectors(self) -> Tuple[np.ndarray, np.ndarray]:
         diff_op = np.asarray(self.phate_operator.graph.diff_op.todense())
-        eigen_values, eigen_vectors = np.linalg.eig(diff_op)
+        # TODO: kの値を変更する
+        eigen_values, eigen_vectors = eigs(diff_op, k=self.how_many_eigs, which=self.which)
         return eigen_values, eigen_vectors
+
+    def _create_distict_low_centrals(self, distinct_indices: List[int], sorted_centrals: List[int]) -> List[int]:
+        length = len(distinct_indices)
+        distinct_low_centrals = []
+        i = 0
+        while True:
+            partial_low_centrals = sorted_centrals[:self.max_centrals + i]
+            distict_low_centrals = list(set(partial_low_centrals) & set(distinct_indices))
+            if (len(distict_low_centrals) >= self.max_centrals or len(distinct_low_centrals) >= length):
+                break
+            i += 1
+        return distinct_low_centrals
 
     def set_md_result(self, md_result: MDResultModel) -> None:
         self.md_result = md_result
@@ -118,3 +133,5 @@ class PHATEAnalyzer(IAnalyzer):
         self.max_centrals = configuration['max_centrals'] if configuration['max_centrals'] is not None else self.max_centrals
         self.use_distinct_indices = configuration['use_distinct_indices'] if configuration['use_distinct_indices'] is not None else self.use_distinct_indices
         self.use_approximation = configuration['use_approximation'] if configuration['use_approximation'] is not None else self.use_approximation
+        self.which = configuration['which'] if configuration['which'] is not None else self.which
+        self.how_many_eigs = configuration['how_many_eigs'] if configuration['how_many_eigs'] is not None else self.how_many_eigs
