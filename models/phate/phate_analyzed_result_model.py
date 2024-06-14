@@ -8,10 +8,10 @@ class PHATEAnalyzedResultModel(AnalyzedResultModel):
         super().__init__(result, current_state)
         self.max_centrals: int = 50
         self.eigen_centrals = np.array([])
-        self.sorted_centrals = np.array([])
+        self.sorted_centrals: List[int] = []
         self.eigen_values: ndarray[Any] = np.array([])
         self.eigen_vectors: ndarray[Any] = np.array([])
-        self.top_low_centrals: ndarray[int] = np.array([])
+        self.top_low_centrals: List[int] = []
         self.distinct_indices: List[int] = []
         self.distinct_low_centrals: List[int] = []
 

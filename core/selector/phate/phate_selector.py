@@ -19,7 +19,7 @@ class PHATESelector(ISelector):
         dlc_len = len(self.analyzed_result_model.distinct_low_centrals)
 
         if dlc_len < self.analyzed_result_model.max_centrals:
-            self.max_central_list = self.analyzed_result_model.distinct_low_centrals + random.sample(self.analyzed_result_model.distinct_indices, self.analyzed_result_model.max_centrals - dlc_len)
+            self.max_central_list = self.analyzed_result_model.distinct_low_centrals + random.sample(self.analyzed_result_model.top_low_centrals, self.analyzed_result_model.max_centrals - dlc_len)
         else:
             self.max_central_list = self.analyzed_result_model.distinct_low_centrals
 
