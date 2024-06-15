@@ -11,16 +11,24 @@ class FileCreater:
 
     def create_tpr_file(self, tpr_file_name, initial_files: dict, initial_files_path):
         logger.info('Create tpr file')
-        os.system(
-            self.tpr_command(
-                tpr_file_name,
-                os.path.join(self.to_dir, initial_files['input']),
-                initial_files_path['topol'],
-                initial_files_path['index'],
-                os.path.join(self.to_dir, initial_files['input']),
-                initial_files_path['md']
+
+        tpr_file_path = os.path.join(self.to_dir, tpr_file_name)
+
+        count = 0
+        while os.path.exists(tpr_file_path):
+            os.system(
+                self.tpr_command(
+                    tpr_file_name,
+                    os.path.join(self.to_dir, initial_files['input']),
+                    initial_files_path['topol'],
+                    initial_files_path['index'],
+                    os.path.join(self.to_dir, initial_files['input']),
+                    initial_files_path['md']
+                )
             )
-        )
+            count += 1
+            if count >= 10:
+                raise FileExistsError('File already exists: {}'.format(tpr_file_path))
 
     def tpr_command(self, tpr_file_name, gro_file_path, top_file_path, index_file_path, ref_file_path, mdp_file_path):
         command = (
