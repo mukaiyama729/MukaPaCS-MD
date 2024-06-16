@@ -15,7 +15,7 @@ class FileCreater:
         tpr_file_path = os.path.join(self.to_dir, tpr_file_name)
 
         count = 0
-        while os.path.exists(tpr_file_path):
+        while not os.path.exists(tpr_file_path):
             os.system(
                 self.tpr_command(
                     tpr_file_name,
