@@ -27,6 +27,7 @@ class FileCreater:
                 )
             )
             count += 1
+            logger.info('count: {}'.format(count))
             if count >= 10:
                 raise FileExistsError('File already exists: {}'.format(tpr_file_path))
 
