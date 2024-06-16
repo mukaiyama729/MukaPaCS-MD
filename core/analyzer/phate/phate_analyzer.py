@@ -12,7 +12,7 @@ class PHATEAnalyzer(IAnalyzer):
     def __init__(self):
         self.md_result = None
         self.phate_operator = None
-        self.target_cycles = 1
+        self.use_past_trajectory = False
         self.alpha_decay = 5
         self.knn = 5
         self.n_components = 2
@@ -28,7 +28,7 @@ class PHATEAnalyzer(IAnalyzer):
     def analyze(self) -> PHATEAnalyzedResultModel:
         self.phate_operator = phate.PHATE(n_components=self.n_components, knn=self.knn, decay=self.alpha_decay)
         current_state = self.md_result.current_state
-        if self.target_cycles == 1:
+        if not self.use_past_trajectory:
             result = self.md_result.get_current_result()
         else:
             result = self.md_result.result()
@@ -144,3 +144,4 @@ class PHATEAnalyzer(IAnalyzer):
         self.use_approximation = configuration['use_approximation'] if configuration['use_approximation'] is not None else self.use_approximation
         self.which = configuration['which'] if configuration['which'] is not None else self.which
         self.how_many_eigs = configuration['how_many_eigs'] if configuration['how_many_eigs'] is not None else self.how_many_eigs
+        self.use_past_trajectory = bool(configuration['use_past_trajectory']) if configuration['use_past_trajectory'] is not None else bool(self.use_past_trajectory)
