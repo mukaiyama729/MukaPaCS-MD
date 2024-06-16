@@ -54,7 +54,10 @@ class PHATEAnalyzer(IAnalyzer):
 
             distinct_indices = list(set(distinct_indices))
             top_low_centrals = sorted_centrals[:self.max_centrals]
-            self.distinct_low_centrals = self._create_distict_low_centrals(distinct_indices, sorted_centrals)
+            logger.info('distinct indices: {}'.format(distinct_indices))
+            logger.info('top low centrals: {}'.format(top_low_centrals))
+            logger.info('sorted centrals: {}'.format(sorted_centrals))
+            self.distinct_low_centrals = self._create_distinct_low_centrals(distinct_indices, sorted_centrals)
         else:
             eigen_values = None
             eigen_vectors = None
@@ -114,14 +117,15 @@ class PHATEAnalyzer(IAnalyzer):
         eigen_values, eigen_vectors = eigs(diff_op, k=self.how_many_eigs, which=self.which)
         return eigen_values, eigen_vectors
 
-    def _create_distict_low_centrals(self, distinct_indices: List[int], sorted_centrals: List[int]) -> List[int]:
+    def _create_distinct_low_centrals(self, distinct_indices: List[int], sorted_centrals: List[int]) -> List[int]:
         length = len(distinct_indices)
         distinct_low_centrals = []
         i = 0
         while True:
             partial_low_centrals = sorted_centrals[:self.max_centrals + i]
-            distict_low_centrals = list(set(partial_low_centrals) & set(distinct_indices))
-            if (len(distict_low_centrals) >= self.max_centrals or len(distinct_low_centrals) >= length):
+            distinct_low_centrals = list(set(partial_low_centrals) & set(distinct_indices))
+            if (len(distinct_low_centrals) >= self.max_centrals or len(distinct_low_centrals) >= length):
+                logger.info('i: {}'.format(i))
                 break
             i += 1
         return distinct_low_centrals

@@ -99,16 +99,16 @@ class BasePaCSMD:
 
     def create_md_result(self, traj_objs: Dict[Tuple[int, int, int], Trajectory]) -> MDResultModel:
         alignment_operators = self._create_alignment_operator(traj_objs, self.ref_traj)
-        logger.info('Alignment operators: {}'.format(alignment_operators))
+        #logger.info('Alignment operators: {}'.format(alignment_operators))
 
         selected_trajs = self._select_traj(traj_objs)#self.ref_traj.topology
-        logger.info('Selected trajs: {}'.format(selected_trajs))
+        #logger.info('Selected trajs: {}'.format(selected_trajs))
 
         transformed_traj_data = self._transform_traj(selected_trajs, alignment_operators)
-        logger.info('Transformed traj data: {}'.format(transformed_traj_data))
+        #logger.info('Transformed traj data: {}'.format(transformed_traj_data))
 
         assembled_traj_data = self._assemble_traj_data(transformed_traj_data)
-        logger.info('Assembled traj data: {}'.format(assembled_traj_data))
+        #logger.info('Assembled traj data: {}'.format(assembled_traj_data))
 
         self.md_result = self._get_md_result(assembled_traj_data)
         logger.info('md result: {}'.format(self.md_result))
