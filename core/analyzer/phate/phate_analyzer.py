@@ -10,7 +10,7 @@ logger = logging.getLogger('pacs_md')
 
 class PHATEAnalyzer(IAnalyzer):
     def __init__(self):
-        self.md_result = None
+        self.md_result: MDResultModel = None
         self.phate_operator = None
         self.use_past_trajectory = False
         self.alpha_decay = 5
@@ -31,7 +31,7 @@ class PHATEAnalyzer(IAnalyzer):
         if not self.use_past_trajectory:
             result = self.md_result.get_current_result()
         else:
-            result = self.md_result.result()
+            result = self.md_result.result
         logger.info('result: {}'.format(result))
 
         #複数のList[np.ndarray]を一つのnp.ndarrayに変換
