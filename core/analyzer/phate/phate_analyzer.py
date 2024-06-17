@@ -32,7 +32,7 @@ class PHATEAnalyzer(IAnalyzer):
             result = self.md_result.get_current_result()
         else:
             result = self.md_result.result
-        logger.info('result: {}'.format(result))
+        logger.info('result: {}'.format(result.keys()))
 
         #複数のList[np.ndarray]を一つのnp.ndarrayに変換
         traj = np.array(list(result.values())).reshape(len(result), -1)
