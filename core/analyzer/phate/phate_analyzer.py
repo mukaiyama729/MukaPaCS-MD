@@ -63,15 +63,17 @@ class PHATEAnalyzer(IAnalyzer):
             logger.info('top low centrals: {}'.format(top_low_centrals))
             logger.info('sorted centrals: {}'.format(sorted_centrals))
             self.distinct_low_centrals = self._create_distinct_low_centrals(distinct_indices, sorted_centrals)
+            logger.info('previous distinct centrals: {}'.format(self.distinct_low_centrals))
         else:
             eigen_values = None
             eigen_vectors = None
             top_low_centrals = sorted_centrals[:self.max_centrals]
             self.distinct_low_centrals = top_low_centrals
+            logger.info('previous distinct centrals: {}'.format(self.distinct_low_centrals))
 
         if self.use_selected_structures:
+            logger.info('use selected structures')
             self.distinct_low_centrals = self._exclude_past_points(self.distinct_low_centrals, past_selected_indices)
-
 
         logger.info('distinct low centrals: {},'.format(self.distinct_low_centrals))
         phate_analyzed_result_model = self._create_analyzed_result_model(
@@ -95,6 +97,7 @@ class PHATEAnalyzer(IAnalyzer):
 
     def _exclude_past_points(self, distinct_low_centrals: List[int], past_selected_indices: List[int]):
         if any(past_selected_indices):
+            logger.info('past selected indices: {}'.format(past_selected_indices))
             distinct_low_centrals = np.array(distinct_low_centrals)
             scores = []
             for i in past_selected_indices:
@@ -103,7 +106,8 @@ class PHATEAnalyzer(IAnalyzer):
             scores = np.array(scores)
             scores = np.mean(scores, axis=0)
             best_points = list(np.argsort(scores))[::-1]
-        return list(distinct_low_centrals[best_points])
+            return list(distinct_low_centrals[best_points])
+        return distinct_low_centrals
 
     def _create_data_for_analysis(self) -> Tuple[Dict[Tuple[int, int, int, float], List[np.ndarray]], Set[Tuple[int, int, int, float]] | Set]:
         past_selected_structures = {}
