@@ -52,11 +52,14 @@ class PaCSMDExecuter:
 
     def create_mode(self):
         if self.settings.mode == 'phate':
+            phate_selector = PHATESelector()
+            phate_evaluater = PHATEEvaluter()
+            phate_analyzer = PHATEAnalyzer(selector=phate_selector, evaluator=phate_evaluater)
             mode = {
                 'md': MD(),
-                'evaluater': PHATEEvaluter(),
-                'analyzer': PHATEAnalyzer(),
-                'selector': PHATESelector(),
+                'selector': phate_selector,
+                'evaluater': phate_evaluater,
+                'analyzer': phate_analyzer,
             }
         logger.info('Mode: {}'.format(mode))
         return mode

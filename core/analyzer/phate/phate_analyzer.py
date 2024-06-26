@@ -1,7 +1,9 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Set
 from ..i_analyzer import IAnalyzer
 from models import MDResultModel, AnalyzedResultModel
 from models.phate import PHATEAnalyzedResultModel
+from core.selector.i_selector import ISelector
+from core.evaluater.i_evaluater import IEvaluater
 import phate
 import numpy as np
 import logging
@@ -9,33 +11,36 @@ from scipy.sparse.linalg import eigs
 logger = logging.getLogger('pacs_md')
 
 class PHATEAnalyzer(IAnalyzer):
-    def __init__(self):
+    def __init__(self, selector: ISelector, evaluator: IEvaluater):
         self.md_result: MDResultModel = None
         self.phate_operator = None
         self.use_past_trajectory = False
+        self.use_selected_structures = True
         self.alpha_decay = 5
         self.knn = 5
         self.n_components = 2
         self.num_powered_iterations = 40
-        self.max_centrals = 50
+        self.max_centrals = 100
         self.authority = False
         self.analyzed_result = None
-        self.use_distinct_indices = False
-        self.use_approximation = True
-        self.which = 'LM'
-        self.how_many_eigs = 100
+        self.use_distinct_indices: bool = False
+        self.use_approximation: bool = True
+        self.which: str = 'LM'
+        self.how_many_eigs: int = 200
+        self.distinct_low_centrals: List[int] = []
+
+        self.selector: ISelector = selector
+        self.evaluator: IEvaluater = evaluator
 
     def analyze(self) -> PHATEAnalyzedResultModel:
         self.phate_operator = phate.PHATE(n_components=self.n_components, knn=self.knn, decay=self.alpha_decay)
         current_state = self.md_result.current_state
-        if not self.use_past_trajectory:
-            result = self.md_result.get_current_result()
-        else:
-            result = self.md_result.result
-        logger.info('result: {}'.format(result.keys()))
+
+        analyzed_data, past_selected_keys, past_selected_structures = self._create_data_for_analysis()
+        past_selected_indices = [i for i in range(len(past_selected_keys))]
 
         #複数のList[np.ndarray]を一つのnp.ndarrayに変換
-        traj = np.array(list(result.values())).reshape(len(result), -1)
+        traj = np.array(list(analyzed_data.values())).reshape(len(analyzed_data), -1)
 
         traj_data = np.array(traj).astype(np.float64)
         self.analyzed_result = self.phate_operator.fit_transform(traj_data)
@@ -64,10 +69,15 @@ class PHATEAnalyzer(IAnalyzer):
             top_low_centrals = sorted_centrals[:self.max_centrals]
             self.distinct_low_centrals = top_low_centrals
 
+        if self.use_selected_structures:
+            self.distinct_low_centrals = self._exclude_past_points(self.distinct_low_centrals, past_selected_indices)
+
+
         logger.info('distinct low centrals: {},'.format(self.distinct_low_centrals))
-        phate_analyzed_result_model = self.create_analyzed_result_model(
-            result,
+        phate_analyzed_result_model = self._create_analyzed_result_model(
+            analyzed_data,
             current_state,
+            index_to_key=dict(zip([i for i in range(len(analyzed_data))], analyzed_data.keys())),
             max_centrals=self.max_centrals,
             eigen_centrals=eigen_centrals,
             sorted_centrals=sorted_centrals,
@@ -75,12 +85,42 @@ class PHATEAnalyzer(IAnalyzer):
             eigen_vectors=eigen_vectors,
             top_low_centrals=top_low_centrals,
             distinct_indices=distinct_indices,
-            distinct_low_centrals=self.distinct_low_centrals
+            distinct_low_centrals=self.distinct_low_centrals,
+            past_selected_keys=past_selected_keys,
+            past_selected_structures=past_selected_structures,
+            past_selected_indices=past_selected_indices
         )
 
         return phate_analyzed_result_model
 
-    def create_analyzed_result_model(self, used_md_results: Dict[Tuple[int, int, int, float], List[np.ndarray]], current_state,  **kwargs):
+    def _exclude_past_points(self, distinct_low_centrals: List[int], past_selected_indices: List[int]):
+        if any(past_selected_indices):
+            distinct_low_centrals = np.array(distinct_low_centrals)
+            scores = []
+            for i in past_selected_indices:
+                scores.append(np.sqrt(np.linalg.norm(np.array((self.phate_operator.diff_potential[distinct_low_centrals,:] - self.phate_operator.diff_potential[i,:])), axis=1, ord=2)))
+
+            scores = np.array(scores)
+            scores = np.mean(scores, axis=0)
+            best_points = list(np.argsort(scores))[::-1]
+        return list(distinct_low_centrals[best_points])
+
+    def _create_data_for_analysis(self) -> Tuple[Dict[Tuple[int, int, int, float], List[np.ndarray]], Set[Tuple[int, int, int, float]] | Set]:
+        past_selected_structures = {}
+        past_selected_keys = set()
+        if not self.use_past_trajectory:
+            result: Dict[Tuple[int, int, int, float], List[np.ndarray]]  = self.md_result.get_current_result()
+        else:
+            result: Dict[Tuple[int, int, int, float], List[np.ndarray]] = self.md_result.result
+        logger.info('result: {}'.format(result.keys()))
+        if self.use_selected_structures:
+            past_selected_structures = self.selector.past_selected_structures()
+            logger.info('past selected structures: {}'.format(past_selected_structures.keys()))
+            past_selected_keys = set(past_selected_structures.keys()) - set(result.keys())
+            logger.info('past selected keys: {}'.format(past_selected_keys))
+        return { **past_selected_structures, **result }, past_selected_keys, past_selected_structures
+
+    def _create_analyzed_result_model(self, used_md_results: Dict[Tuple[int, int, int, float], List[np.ndarray]], current_state,  **kwargs):
         analyzed_result = {}
 
         for key, result in zip(used_md_results.keys(), self.analyzed_result):
@@ -108,7 +148,7 @@ class PHATEAnalyzer(IAnalyzer):
         A_temp = affinity_matrix.T if self.authority else affinity_matrix
         n = len(A_temp)
         r = spectral_radius(A_temp)
-        e = r**(-self.num_powered_iterations) * (np.linalg.matrix_power(A_temp, self.num_powered_iterations) @ np.ones(n))
+        e = r**(-1 * self.phate_operator.optimal_t) * (np.linalg.matrix_power(A_temp, self.phate_operator.optimal_t) @ np.ones(n))
         return e / np.sum(e)
 
     def cal_eigenvectors(self) -> Tuple[np.ndarray, np.ndarray]:
@@ -145,3 +185,4 @@ class PHATEAnalyzer(IAnalyzer):
         self.which = configuration['which'] if configuration['which'] is not None else self.which
         self.how_many_eigs = configuration['how_many_eigs'] if configuration['how_many_eigs'] is not None else self.how_many_eigs
         self.use_past_trajectory = bool(configuration['use_past_trajectory']) if configuration['use_past_trajectory'] is not None else bool(self.use_past_trajectory)
+        self.use_selected_structures = bool(configuration['use_selected_structures']) if configuration['use_selected_structures'] is not None else bool(self.use_selected_structures)

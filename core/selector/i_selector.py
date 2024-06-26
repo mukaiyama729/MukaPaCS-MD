@@ -1,6 +1,7 @@
 import abc
 from typing import Dict, Tuple, List
 from models import AnalyzedResultModel
+from numpy import ndarray
 
 class ISelector(metaclass=abc.ABCMeta):
 
@@ -14,4 +15,8 @@ class ISelector(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def set_configuration(self, configuration: Dict[str, object]) -> None:
+        pass
+
+    @abc.abstractmethod
+    def past_selected_structures(self) -> Dict[Tuple[int, int, int, float], List[ndarray]]:
         pass

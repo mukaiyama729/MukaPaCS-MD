@@ -14,7 +14,7 @@ class MDResultModel(BaseResultModel):
         self.current_state = current_state
         #self.md_settings = md_settings
 
-    def get_current_result(self) -> Dict[Tuple[int, int, int, float], List[np.ndarray]]:
+    def get_current_result(self) -> object:
         current_result = {}
         current_keys = set(filter(lambda x: x[0] == self.current_state[0] and x[1] == self.current_state[1], set(self.result.keys())))
         for key in current_keys:
