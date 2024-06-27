@@ -38,6 +38,8 @@ class PHATEAnalyzer(IAnalyzer):
 
         analyzed_data, past_selected_keys, past_selected_structures = self._create_data_for_analysis()
         past_selected_indices = [i for i in range(len(past_selected_keys))]
+        logger.info('analyzed_data: {}'.format(analyzed_data))
+        logger.info('past selected structures: {}'.format(past_selected_structures))
 
         #複数のList[np.ndarray]を一つのnp.ndarrayに変換
         traj = np.array(list(analyzed_data.values())).reshape(len(analyzed_data), -1)
@@ -63,13 +65,13 @@ class PHATEAnalyzer(IAnalyzer):
             logger.info('top low centrals: {}'.format(top_low_centrals))
             logger.info('sorted centrals: {}'.format(sorted_centrals))
             self.distinct_low_centrals = self._create_distinct_low_centrals(distinct_indices, sorted_centrals)
-            logger.info('previous distinct centrals: {}'.format(self.distinct_low_centrals))
+            logger.info('pre distinct centrals: {}'.format(self.distinct_low_centrals))
         else:
             eigen_values = None
             eigen_vectors = None
             top_low_centrals = sorted_centrals[:self.max_centrals]
             self.distinct_low_centrals = top_low_centrals
-            logger.info('previous distinct centrals: {}'.format(self.distinct_low_centrals))
+            logger.info('pre distinct centrals: {}'.format(self.distinct_low_centrals))
 
         if self.use_selected_structures:
             logger.info('use selected structures')
@@ -79,6 +81,7 @@ class PHATEAnalyzer(IAnalyzer):
         phate_analyzed_result_model = self._create_analyzed_result_model(
             analyzed_data,
             current_state,
+            original_data=analyzed_data,
             index_to_key=dict(zip([i for i in range(len(analyzed_data))], analyzed_data.keys())),
             max_centrals=self.max_centrals,
             eigen_centrals=eigen_centrals,
@@ -105,6 +108,7 @@ class PHATEAnalyzer(IAnalyzer):
 
             scores = np.array(scores)
             scores = np.mean(scores, axis=0)
+            logger.info('scores: {}'.format(scores))
             best_points = list(np.argsort(scores))[::-1]
             return list(distinct_low_centrals[best_points])
         return distinct_low_centrals
@@ -125,12 +129,12 @@ class PHATEAnalyzer(IAnalyzer):
         return { **past_selected_structures, **result }, past_selected_keys, past_selected_structures
 
     def _create_analyzed_result_model(self, used_md_results: Dict[Tuple[int, int, int, float], List[np.ndarray]], current_state,  **kwargs):
-        analyzed_result = {}
+        analyzed_results = {}
 
         for key, result in zip(used_md_results.keys(), self.analyzed_result):
-            analyzed_result[key] = result
+            analyzed_results[key] = result
 
-        return PHATEAnalyzedResultModel(analyzed_result, current_state).from_map(kwargs)
+        return PHATEAnalyzedResultModel(analyzed_results, current_state).from_map(kwargs)
 
     def cal_eigenvector_centrality(self):
         def spectral_radius(M):

@@ -6,6 +6,7 @@ from numpy import ndarray
 class PHATEAnalyzedResultModel(AnalyzedResultModel):
     def __init__(self, result: Dict[Tuple, List[np.ndarray]], current_state):
         super().__init__(result, current_state)
+        self.original_data: Dict[Tuple, List[np.ndarray]] = {}
         self.index_to_key: Dict[int, Tuple[int, int, int, float]] = {}
         self.max_centrals: int = 50
         self.eigen_centrals = np.array([])
@@ -20,6 +21,7 @@ class PHATEAnalyzedResultModel(AnalyzedResultModel):
         self.past_selected_structures: Dict[Tuple[int, int, int, float], List[ndarray]] = {}
 
     def from_map(self, map: Dict[str, Any]):
+        self.original_data = map['original_data']
         self.index_to_key = map['index_to_key']
         self.max_centrals = map['max_centrals']
         self.eigen_centrals = map['eigen_centrals']

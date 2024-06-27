@@ -6,7 +6,9 @@ from typing import List, Tuple, Dict
 import random
 from numpy import ndarray
 import numpy as np
+import logging
 
+logger = logging.getLogger('pacs_md')
 
 class PHATESelector(ISelector):
     def __init__(self):
@@ -33,9 +35,10 @@ class PHATESelector(ISelector):
         return result
 
     def _update_past_structures(self):
-        all_keys = list(self.analyzed_result_model.result.keys())
+        logger.info('update past selected structures')
+        all_keys = list(self.analyzed_result_model.original_data.keys())
         for index in self.max_central_list:
-            self._past_selected_structures[all_keys[index]] = self.analyzed_result_model.result[all_keys[index]]
+            self._past_selected_structures[all_keys[index]] = self.analyzed_result_model.original_data[all_keys[index]]
 
     def past_selected_structures(self) -> Dict[Tuple[int, int, int, float], List[np.ndarray]]:
         return self._past_selected_structures
