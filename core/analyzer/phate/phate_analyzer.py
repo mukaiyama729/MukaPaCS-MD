@@ -38,8 +38,8 @@ class PHATEAnalyzer(IAnalyzer):
 
         analyzed_data, past_selected_keys, past_selected_structures = self._create_data_for_analysis()
         past_selected_indices = [i for i in range(len(past_selected_keys))]
-        logger.info('analyzed_data: {}'.format(analyzed_data))
-        logger.info('past selected structures: {}'.format(past_selected_structures))
+        logger.info('past selected indices: {}'.format(past_selected_indices))
+        logger.info('analyzed_data: {}'.format(list(analyzed_data.keys())))
 
         #複数のList[np.ndarray]を一つのnp.ndarrayに変換
         traj = np.array(list(analyzed_data.values())).reshape(len(analyzed_data), -1)
@@ -124,7 +124,7 @@ class PHATEAnalyzer(IAnalyzer):
         if self.use_selected_structures:
             past_selected_structures = self.selector.past_selected_structures()
             logger.info('past selected structures: {}'.format(past_selected_structures.keys()))
-            past_selected_keys = set(past_selected_structures.keys()) - set(result.keys())
+            past_selected_keys = set(past_selected_structures.keys())
             logger.info('past selected keys: {}'.format(past_selected_keys))
         return { **past_selected_structures, **result }, past_selected_keys, past_selected_structures
 
