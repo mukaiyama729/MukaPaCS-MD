@@ -16,7 +16,7 @@ class PHATESelector(ISelector):
         self.is_continue: bool = None
         self.max_central_list: List[int] = None
         self._past_selected_structures: Dict[Tuple[int, int, int, float], List[np.ndarray]] = {}
-        self.how_many: int = 30
+        self.how_many: int = 100
 
     def select(self) -> List[Tuple[int, int, int, float]]:
         if self.analyzed_result_model is None:
@@ -26,6 +26,8 @@ class PHATESelector(ISelector):
 
         if dlc_len < self.how_many:
             self.max_central_list = self.analyzed_result_model.distinct_low_centrals + random.sample(self.analyzed_result_model.top_low_centrals, self.how_many - dlc_len)
+        elif dlc_len > self.how_many:
+            self.max_central_list = self.analyzed_result_model.distinct_low_centrals[:self.how_many]
         else:
             self.max_central_list = self.analyzed_result_model.distinct_low_centrals
 

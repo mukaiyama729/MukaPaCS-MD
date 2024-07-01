@@ -22,7 +22,7 @@ class PHATEAnalyzer(IAnalyzer):
         self.num_powered_iterations = 40
         self.max_centrals = 100
         self.authority = False
-        self.analyzed_result = None
+        self.analyzed_result: np.ndarray = None # (data num, 2 dim)
         self.use_distinct_indices: bool = False
         self.use_approximation: bool = True
         self.which: str = 'LM'
@@ -37,6 +37,7 @@ class PHATEAnalyzer(IAnalyzer):
         current_state = self.md_result.current_state
 
         analyzed_data, past_selected_keys, past_selected_structures = self._create_data_for_analysis()
+        analyzed_data_keys = list(analyzed_data.keys())
         past_selected_indices = [i for i in range(len(past_selected_keys))]
         logger.info('past selected indices: {}'.format(past_selected_indices))
         logger.info('analyzed_data: {}'.format(list(analyzed_data.keys())))
@@ -77,6 +78,9 @@ class PHATEAnalyzer(IAnalyzer):
             logger.info('use selected structures')
             self.distinct_low_centrals = self._exclude_past_points(self.distinct_low_centrals, past_selected_indices)
 
+        distinct_low_central_keys = [analyzed_data_keys[i] for i in self.distinct_low_centrals]
+        logger.info('distinct low central keys: {}'.format(distinct_low_central_keys))
+
         logger.info('distinct low centrals: {},'.format(self.distinct_low_centrals))
         phate_analyzed_result_model = self._create_analyzed_result_model(
             analyzed_data,
@@ -91,6 +95,7 @@ class PHATEAnalyzer(IAnalyzer):
             top_low_centrals=top_low_centrals,
             distinct_indices=distinct_indices,
             distinct_low_centrals=self.distinct_low_centrals,
+            distinct_low_central_keys=[analyzed_data_keys[i] for i in self.distinct_low_centrals],
             past_selected_keys=past_selected_keys,
             past_selected_structures=past_selected_structures,
             past_selected_indices=past_selected_indices
@@ -114,8 +119,8 @@ class PHATEAnalyzer(IAnalyzer):
         return distinct_low_centrals
 
     def _create_data_for_analysis(self) -> Tuple[Dict[Tuple[int, int, int, float], List[np.ndarray]], Set[Tuple[int, int, int, float]] | Set]:
-        past_selected_structures = {}
-        past_selected_keys = set()
+        past_selected_structures = dict()
+        past_selected_keys = []
         if not self.use_past_trajectory:
             result: Dict[Tuple[int, int, int, float], List[np.ndarray]]  = self.md_result.get_current_result()
         else:
@@ -124,7 +129,7 @@ class PHATEAnalyzer(IAnalyzer):
         if self.use_selected_structures:
             past_selected_structures = self.selector.past_selected_structures()
             logger.info('past selected structures: {}'.format(past_selected_structures.keys()))
-            past_selected_keys = set(past_selected_structures.keys())
+            past_selected_keys = list(past_selected_structures.keys())
             logger.info('past selected keys: {}'.format(past_selected_keys))
         return { **past_selected_structures, **result }, past_selected_keys, past_selected_structures
 

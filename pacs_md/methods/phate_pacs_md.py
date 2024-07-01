@@ -24,7 +24,7 @@ class PHATEPaCSMD(BasePaCSMD):
 
     def set_mode(self, mode: Dict[str, object]):
         self.set_md(mode['md'])
-        self.set_core(mode['evaluater'], mode['analyzer'], mode['selector'])
+        self.set_core(mode['evaluater'], mode['analyzer'], mode['selector'], mode['visualizer'])
         self.set_reference_traj()
 
     def check_necessary_files(self, work_dir) -> None:

@@ -1,10 +1,10 @@
 from models.analyzed_result_model import AnalyzedResultModel
-from typing import Dict, Tuple, Callable, List, Any
+from typing import Dict, Tuple, Callable, List, Any, Set
 import numpy as np
 from numpy import ndarray
 
 class PHATEAnalyzedResultModel(AnalyzedResultModel):
-    def __init__(self, result: Dict[Tuple, List[np.ndarray]], current_state):
+    def __init__(self, result: Dict[Tuple, List[np.ndarray]], current_state: Tuple[int, int]):
         super().__init__(result, current_state)
         self.original_data: Dict[Tuple, List[np.ndarray]] = {}
         self.index_to_key: Dict[int, Tuple[int, int, int, float]] = {}
@@ -16,6 +16,7 @@ class PHATEAnalyzedResultModel(AnalyzedResultModel):
         self.top_low_centrals: List[int] = []
         self.distinct_indices: List[int] = []
         self.distinct_low_centrals: List[int] = []
+        self.distinct_low_central_keys: List[Tuple[int, int, int, float]]
         self.past_selected_indices: List[int] = []
         self.past_selected_keys: List[Tuple[int, int, int, float]] = []
         self.past_selected_structures: Dict[Tuple[int, int, int, float], List[ndarray]] = {}
@@ -31,6 +32,7 @@ class PHATEAnalyzedResultModel(AnalyzedResultModel):
         self.top_low_centrals = map['top_low_centrals']
         self.distinct_indices = map['distinct_indices']
         self.distinct_low_centrals = map['distinct_low_centrals']
+        self.distinct_low_central_keys = map['distinct_low_central_keys']
         self.past_selected_keys = map['past_selected_keys'] if 'past_selected_keys' in map else []
         self.past_selected_structures = map['past_selected_structures'] if 'past_selected_structures' in map else {}
         self.past_selected_indices = map['past_selected_indices'] if 'past_selected_indices' in map else []

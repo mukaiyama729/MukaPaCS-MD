@@ -29,11 +29,12 @@ class BasePaCSMD:
         self.rank_traj_list = []
         self.trial = trial
 
-    def set_core(self, evaluater: IEvaluater, analyzer: IAnalyzer, selector: ISelector):
+    def set_core(self, evaluater: IEvaluater, analyzer: IAnalyzer, selector: ISelector, visualizer: IVisualizer):
         logging.info('Set core')
         self.evaluater = evaluater
         self.analyzer = analyzer
         self.selector = selector
+        self.visualizer = visualizer
 
     def set_md(self, md: IMD):
         logger.info('Set MD')
@@ -66,9 +67,15 @@ class BasePaCSMD:
         self.rank_traj_list = self._select_structures(analyzed_result_model)
 
     def _execute_analyze(self):
+
         self.analyzer.set_md_result(self.md_result)
         self.analyzer.set_configuration(self.settings.core['analyzer'])
         analyed_result_model = self.analyzer.analyze()
+
+        self.visualizer.set_analyzed_result_model(analyzed_result=analyed_result_model)
+        self.visualizer.set_configuration(self.settings.core['visualizer'])
+        self.visualizer.visualize()
+
         return analyed_result_model
 
     def _is_continued(self, analyed_result_model: AnalyzedResultModel):

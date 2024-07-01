@@ -9,6 +9,7 @@ class Settings:
         self.config = configparser.ConfigParser()
         self.config.read(config_file)
         self.base_dir = self.config['PATH']['base_dir']
+        self.core = {}
         self._set_settings()
 
     def _set_settings(self):
@@ -49,4 +50,4 @@ class Settings:
         self.core['analyzer'] = { key: int(value) if value.isdigit() else value for key, value in self.config['PHATEANALYZER'].items() }
         self.core['evaluater'] = { key: int(value) if value.isdigit() else value for key, value in self.config['PHATEEVALUATER'].items() }
         self.core['selector'] = { key: int(value) if value.isdigit() else value for key, value in self.config['PHATESELECTOR'].items() }
-
+        self.core['visualizer'] = { key: int(value) if value.isdigit() else value for key, value in self.config['PHATEVISUALIZER'].items() }

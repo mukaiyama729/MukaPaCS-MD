@@ -4,6 +4,7 @@ from pacs_md.md import MD
 from core.evaluater.phate.phate_evaluater import PHATEEvaluter
 from core.analyzer.phate.phate_analyzer import PHATEAnalyzer
 from core.selector.phate.phate_selector import PHATESelector
+from core.visualizer.phate.phate_visualizer import PHATEVisualizer
 import logging
 logger = logging.getLogger('pacs_md')
 
@@ -54,12 +55,14 @@ class PaCSMDExecuter:
         if self.settings.mode == 'phate':
             phate_selector = PHATESelector()
             phate_evaluater = PHATEEvaluter()
+            phate_visualizer = PHATEVisualizer()
             phate_analyzer = PHATEAnalyzer(selector=phate_selector, evaluator=phate_evaluater)
             mode = {
                 'md': MD(),
                 'selector': phate_selector,
                 'evaluater': phate_evaluater,
                 'analyzer': phate_analyzer,
+                'visualizer': phate_visualizer,
             }
         logger.info('Mode: {}'.format(mode))
         return mode
