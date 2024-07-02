@@ -112,7 +112,8 @@ class PHATEAnalyzer(IAnalyzer):
                 scores.append(np.sqrt(np.linalg.norm(np.array((self.phate_operator.diff_potential[distinct_low_centrals,:] - self.phate_operator.diff_potential[i,:])), axis=1, ord=2)))
 
             scores = np.array(scores)
-            scores = np.mean(scores, axis=0)
+            weight = np.linspace(10, 1, scores.shape[0])
+            scores = np.average(scores, axis=0, weights=weights)
             logger.info('scores: {}'.format(scores))
             best_points = list(np.argsort(scores))[::-1]
             return list(distinct_low_centrals[best_points])
