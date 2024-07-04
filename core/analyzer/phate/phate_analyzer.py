@@ -40,7 +40,7 @@ class PHATEAnalyzer(IAnalyzer):
         analyzed_data_keys = list(analyzed_data.keys())
         past_selected_indices = [i for i in range(len(past_selected_keys))]
         logger.info('past selected indices: {}'.format(past_selected_indices))
-        logger.info('analyzed_data: {}'.format(list(analyzed_data.keys())))
+        logger.debug('analyzed_data: {}'.format(list(analyzed_data.keys())))
 
         #複数のList[np.ndarray]を一つのnp.ndarrayに変換
         traj = np.array(list(analyzed_data.values())).reshape(len(analyzed_data), -1)
@@ -105,7 +105,7 @@ class PHATEAnalyzer(IAnalyzer):
 
     def _exclude_past_points(self, distinct_low_centrals: List[int], past_selected_indices: List[int]):
         if any(past_selected_indices):
-            logger.info('past selected indices: {}'.format(past_selected_indices))
+            logger.debug('past selected indices: {}'.format(past_selected_indices))
             distinct_low_centrals = np.array(distinct_low_centrals)
             scores = []
             for i in past_selected_indices:
@@ -126,12 +126,12 @@ class PHATEAnalyzer(IAnalyzer):
             result: Dict[Tuple[int, int, int, float], List[np.ndarray]]  = self.md_result.get_current_result()
         else:
             result: Dict[Tuple[int, int, int, float], List[np.ndarray]] = self.md_result.result
-        logger.info('result: {}'.format(result.keys()))
+        logger.debug('result: {}'.format(result.keys()))
         if self.use_selected_structures:
             past_selected_structures = self.selector.past_selected_structures()
             logger.info('past selected structures: {}'.format(past_selected_structures.keys()))
             past_selected_keys = list(past_selected_structures.keys())
-            logger.info('past selected keys: {}'.format(past_selected_keys))
+            logger.debug('past selected keys: {}'.format(past_selected_keys))
         return { **past_selected_structures, **result }, past_selected_keys, past_selected_structures
 
     def _create_analyzed_result_model(self, used_md_results: Dict[Tuple[int, int, int, float], List[np.ndarray]], current_state,  **kwargs):

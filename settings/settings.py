@@ -1,5 +1,6 @@
 import configparser
 from typing import List
+import os
 
 class Settings:
     file_to_pattern = { 'topol': 'topol*.top', 'index': 'index*.ndx', 'input': 'input*.gro', 'md': 'md*.mdp', 'posres': '*.itp', 'sel': 'sel.dat' }
@@ -16,6 +17,37 @@ class Settings:
         self.set_md_settings()
         self.set_pacs_md()
         self.set_core()
+
+    def set_logger(self, logging,  level='info',):
+        if level == 'info':
+            logger = logging.getLogger('pacs_md')
+            logger.setLevel(logging.INFO)
+            handler = logging.FileHandler(os.path.join(self.base_dir, 'pacs_log.log'))
+            fmt = logging.Formatter('%(asctime)s %(message)s')
+            handler.setFormatter(fmt)
+            logger.addHandler(handler)
+
+            selection_logger = logging.getLogger('selection')
+            selection_logger.setLevel(logging.INFO)
+            handler = logging.FileHandler(os.path.join(self.base_dir, 'selection_log.log'))
+            fmt = logging.Formatter('%(asctime)s %(message)s')
+            handler.setFormatter(fmt)
+            selection_logger.addHandler(handler)
+
+        elif level == 'debug':
+            logger = logging.getLogger('pacs_md')
+            logger.setLevel(logging.DEBUG)
+            handler = logging.FileHandler(os.path.join(self.base_dir, 'pacs_log.log'))
+            fmt = logging.Formatter('%(asctime)s %(message)s')
+            handler.setFormatter(fmt)
+            logger.addHandler(handler)
+
+            selection_logger = logging.getLogger('selection')
+            selection_logger.setLevel(logging.DEBUG)
+            handler = logging.FileHandler(os.path.join(self.base_dir, 'selection_log.log'))
+            fmt = logging.Formatter('%(asctime)s %(message)s')
+            handler.setFormatter(fmt)
+            selection_logger.addHandler(handler)
 
     def set_md_settings(self):
         self.process_per_node = -1
