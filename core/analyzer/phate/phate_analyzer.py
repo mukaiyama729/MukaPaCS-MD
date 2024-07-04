@@ -19,7 +19,7 @@ class PHATEAnalyzer(IAnalyzer):
         self.alpha_decay = 5
         self.knn = 5
         self.n_components = 2
-        self.num_powered_iterations = 40
+        self.num_powered_iterations = 200
         self.max_centrals = 100
         self.authority = False
         self.analyzed_result: np.ndarray = None # (data num, 2 dim)
@@ -162,8 +162,21 @@ class PHATEAnalyzer(IAnalyzer):
         A_temp = affinity_matrix.T if self.authority else affinity_matrix
         n = len(A_temp)
         r = spectral_radius(A_temp)
-        e = r**(-1 * self.phate_operator.optimal_t) * (np.linalg.matrix_power(A_temp, self.phate_operator.optimal_t) @ np.ones(n))
-        return e / np.sum(e)
+        v = np.ones(n)
+
+        for i in range(self.num_powered_iterations):
+            v_next = r**(-1) * (A_temp @ v)
+            v_next = v_next / np.sum(v_next)
+            v_next = np.array(v_next).flatten()
+
+            if np.linalg.norm(v_next - v) < self.tol:
+                logger.info(f'Converged in {i+1} iterations')
+                return v_next
+
+            v = v_next.flatten()
+
+        logger.info('Reached maximum iterations without full convergence')
+        return v
 
     def cal_eigenvectors(self) -> Tuple[np.ndarray, np.ndarray]:
         diff_op = np.asarray(self.phate_operator.graph.diff_op.todense())
@@ -193,6 +206,7 @@ class PHATEAnalyzer(IAnalyzer):
         self.knn = configuration['knn'] if configuration['knn'] is not None else self.knn
         self.n_components = configuration['n_components'] if configuration['n_components'] is not None else self.n_components
         self.num_powered_iterations = configuration['num_powered_iterations'] if configuration['num_powered_iterations'] is not None else self.num_powered_iterations
+        self.tol = configuration['tol'] if configuration['tol'] is not None else self.tol
         self.max_centrals = configuration['max_centrals'] if configuration['max_centrals'] is not None else self.max_centrals
         self.use_distinct_indices = configuration['use_distinct_indices'] if configuration['use_distinct_indices'] is not None else self.use_distinct_indices
         self.use_approximation = configuration['use_approximation'] if configuration['use_approximation'] is not None else self.use_approximation

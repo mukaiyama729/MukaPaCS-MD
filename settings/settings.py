@@ -47,7 +47,24 @@ class Settings:
 
     def set_core(self):
         self.core = {}
-        self.core['analyzer'] = { key: int(value) if value.isdigit() else value for key, value in self.config['PHATEANALYZER'].items() }
-        self.core['evaluater'] = { key: int(value) if value.isdigit() else value for key, value in self.config['PHATEEVALUATER'].items() }
-        self.core['selector'] = { key: int(value) if value.isdigit() else value for key, value in self.config['PHATESELECTOR'].items() }
-        self.core['visualizer'] = { key: int(value) if value.isdigit() else value for key, value in self.config['PHATEVISUALIZER'].items() }
+        self.core['analyzer'] = { key: self.convert_string(value) for key, value in self.config['PHATEANALYZER'].items() }
+        self.core['evaluater'] = { key: self.convert_string(value) for key, value in self.config['PHATEEVALUATER'].items() }
+        self.core['selector'] = { key: self.convert_string(value) for key, value in self.config['PHATESELECTOR'].items() }
+        self.core['visualizer'] = { key: self.convert_string(value) for key, value in self.config['PHATEVISUALIZER'].items() }
+
+    def convert_string(self, s: str):
+        # Try to convert to int
+        try:
+            return int(s)
+        except ValueError:
+            pass
+
+        # Try to convert to float
+        try:
+            return float(s)
+        except ValueError:
+            pass
+
+        # If not int or float, return as str
+        return s
+
