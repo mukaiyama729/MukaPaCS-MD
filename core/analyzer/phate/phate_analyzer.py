@@ -6,6 +6,7 @@ from core.selector.i_selector import ISelector
 from core.evaluater.i_evaluater import IEvaluater
 import phate
 import numpy as np
+from tqdm import tqdm
 import logging
 from scipy.sparse.linalg import eigs
 logger = logging.getLogger('pacs_md')
@@ -19,7 +20,7 @@ class PHATEAnalyzer(IAnalyzer):
         self.alpha_decay = 5
         self.knn = 5
         self.n_components = 2
-        self.num_powered_iterations = 40
+        self.num_powered_iterations = 200
         self.max_centrals = 100
         self.authority = False
         self.analyzed_result: np.ndarray = None # (data num, 2 dim)
@@ -40,7 +41,7 @@ class PHATEAnalyzer(IAnalyzer):
         analyzed_data_keys = list(analyzed_data.keys())
         past_selected_indices = [i for i in range(len(past_selected_keys))]
         logger.info('past selected indices: {}'.format(past_selected_indices))
-        logger.info('analyzed_data: {}'.format(list(analyzed_data.keys())))
+        logger.debug('analyzed_data: {}'.format(list(analyzed_data.keys())))
 
         #複数のList[np.ndarray]を一つのnp.ndarrayに変換
         traj = np.array(list(analyzed_data.values())).reshape(len(analyzed_data), -1)
@@ -105,14 +106,15 @@ class PHATEAnalyzer(IAnalyzer):
 
     def _exclude_past_points(self, distinct_low_centrals: List[int], past_selected_indices: List[int]):
         if any(past_selected_indices):
-            logger.info('past selected indices: {}'.format(past_selected_indices))
+            logger.debug('past selected indices: {}'.format(past_selected_indices))
             distinct_low_centrals = np.array(distinct_low_centrals)
             scores = []
-            for i in past_selected_indices:
+            for i in tqdm(past_selected_indices):
                 scores.append(np.sqrt(np.linalg.norm(np.array((self.phate_operator.diff_potential[distinct_low_centrals,:] - self.phate_operator.diff_potential[i,:])), axis=1, ord=2)))
 
             scores = np.array(scores)
-            scores = np.mean(scores, axis=0)
+            weights = np.linspace(10, 1, scores.shape[0])
+            scores = np.average(scores, axis=0, weights=weights)
             logger.info('scores: {}'.format(scores))
             best_points = list(np.argsort(scores))[::-1]
             return list(distinct_low_centrals[best_points])
@@ -125,12 +127,12 @@ class PHATEAnalyzer(IAnalyzer):
             result: Dict[Tuple[int, int, int, float], List[np.ndarray]]  = self.md_result.get_current_result()
         else:
             result: Dict[Tuple[int, int, int, float], List[np.ndarray]] = self.md_result.result
-        logger.info('result: {}'.format(result.keys()))
+        logger.debug('result: {}'.format(result.keys()))
         if self.use_selected_structures:
             past_selected_structures = self.selector.past_selected_structures()
             logger.info('past selected structures: {}'.format(past_selected_structures.keys()))
             past_selected_keys = list(past_selected_structures.keys())
-            logger.info('past selected keys: {}'.format(past_selected_keys))
+            logger.debug('past selected keys: {}'.format(past_selected_keys))
         return { **past_selected_structures, **result }, past_selected_keys, past_selected_structures
 
     def _create_analyzed_result_model(self, used_md_results: Dict[Tuple[int, int, int, float], List[np.ndarray]], current_state,  **kwargs):
@@ -161,8 +163,21 @@ class PHATEAnalyzer(IAnalyzer):
         A_temp = affinity_matrix.T if self.authority else affinity_matrix
         n = len(A_temp)
         r = spectral_radius(A_temp)
-        e = r**(-1 * self.phate_operator.optimal_t) * (np.linalg.matrix_power(A_temp, self.phate_operator.optimal_t) @ np.ones(n))
-        return e / np.sum(e)
+        v = np.ones(n)
+
+        for i in range(self.num_powered_iterations):
+            v_next = r**(-1) * (A_temp @ v)
+            v_next = v_next / np.sum(v_next)
+            v_next = np.array(v_next).flatten()
+
+            if np.linalg.norm(v_next - v) < self.tol:
+                logger.info(f'Converged in {i+1} iterations')
+                return v_next
+
+            v = v_next.flatten()
+
+        logger.info('Reached maximum iterations without full convergence')
+        return v
 
     def cal_eigenvectors(self) -> Tuple[np.ndarray, np.ndarray]:
         diff_op = np.asarray(self.phate_operator.graph.diff_op.todense())
@@ -192,6 +207,7 @@ class PHATEAnalyzer(IAnalyzer):
         self.knn = configuration['knn'] if configuration['knn'] is not None else self.knn
         self.n_components = configuration['n_components'] if configuration['n_components'] is not None else self.n_components
         self.num_powered_iterations = configuration['num_powered_iterations'] if configuration['num_powered_iterations'] is not None else self.num_powered_iterations
+        self.tol = configuration['tol'] if configuration['tol'] is not None else self.tol
         self.max_centrals = configuration['max_centrals'] if configuration['max_centrals'] is not None else self.max_centrals
         self.use_distinct_indices = configuration['use_distinct_indices'] if configuration['use_distinct_indices'] is not None else self.use_distinct_indices
         self.use_approximation = configuration['use_approximation'] if configuration['use_approximation'] is not None else self.use_approximation

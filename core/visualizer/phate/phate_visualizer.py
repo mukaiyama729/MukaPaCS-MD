@@ -48,7 +48,7 @@ class PHATEVisualizer(IVisualizer):
 
     def _past_selected_result(self, selected_keys: List[Tuple[int, int, int, float]] | Set, result: Dict[Tuple, np.ndarray]):
         past_selected = {}
-        logger.info('past selected keys: {}'.format(selected_keys))
+        logger.debug('past selected keys: {}'.format(selected_keys))
         if any(selected_keys):
             for key in selected_keys:
                 past_selected[key] = result[key]

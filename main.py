@@ -13,21 +13,8 @@ def main(parser):
 
 
     settings = Settings(arranged_args['config_path'])
-    logger = logging.getLogger('pacs_md')
-    logger.setLevel(logging.DEBUG)
-    handler = logging.FileHandler(os.path.join(settings.base_dir, 'pacs_log.log'))
-    fmt = logging.Formatter('%(asctime)s %(message)s')
-    handler.setFormatter(fmt)
-    logger.addHandler(handler)
+    settings.set_logger(logging=logging, level='info')
 
-    selection_logger = logging.getLogger('selection')
-    selection_logger.setLevel(logging.DEBUG)
-    handler = logging.FileHandler(os.path.join(settings.base_dir, 'selection_log.log'))
-    fmt = logging.Formatter('%(asctime)s %(message)s')
-    handler.setFormatter(fmt)
-    selection_logger.addHandler(handler)
-
-   
     pacs_md_executer = PaCSMDExecuter(settings.base_dir, settings)
     pacs_md_executer.execute_PaCS_MD()
 
