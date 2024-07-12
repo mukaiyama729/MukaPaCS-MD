@@ -6,6 +6,7 @@ from core.selector.i_selector import ISelector
 from core.evaluater.i_evaluater import IEvaluater
 import phate
 import numpy as np
+from tqdm import tqdm
 import logging
 from scipy.sparse.linalg import eigs
 logger = logging.getLogger('pacs_md')
@@ -108,7 +109,7 @@ class PHATEAnalyzer(IAnalyzer):
             logger.debug('past selected indices: {}'.format(past_selected_indices))
             distinct_low_centrals = np.array(distinct_low_centrals)
             scores = []
-            for i in past_selected_indices:
+            for i in tqdm(past_selected_indices):
                 scores.append(np.sqrt(np.linalg.norm(np.array((self.phate_operator.diff_potential[distinct_low_centrals,:] - self.phate_operator.diff_potential[i,:])), axis=1, ord=2)))
 
             scores = np.array(scores)
