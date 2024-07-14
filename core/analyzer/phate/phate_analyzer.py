@@ -51,7 +51,7 @@ class PHATEAnalyzer(IAnalyzer):
 
         eigen_centrals = np.asarray(self.cal_eigenvector_centrality())
         sorted_centrals = list(np.argsort(eigen_centrals).flatten())
-        logger.info('sorted centrals: {}'.format(sorted_centrals))
+        logger.debug('sorted centrals: {}'.format(sorted_centrals))
 
         distinct_indices = []
         if self.use_distinct_indices:
@@ -65,7 +65,7 @@ class PHATEAnalyzer(IAnalyzer):
             top_low_centrals = sorted_centrals[:self.max_centrals]
             logger.info('distinct indices: {}'.format(distinct_indices))
             logger.info('top low centrals: {}'.format(top_low_centrals))
-            logger.info('sorted centrals: {}'.format(sorted_centrals))
+            logger.debug('sorted centrals: {}'.format(sorted_centrals))
             self.distinct_low_centrals = self._create_distinct_low_centrals(distinct_indices, sorted_centrals)
             logger.info('pre distinct centrals: {}'.format(self.distinct_low_centrals))
         else:
@@ -109,7 +109,7 @@ class PHATEAnalyzer(IAnalyzer):
             logger.debug('past selected indices: {}'.format(past_selected_indices))
             distinct_low_centrals = np.array(distinct_low_centrals)
             scores = []
-            for i in tqdm(past_selected_indices):
+            for i in past_selected_indices:
                 scores.append(np.sqrt(np.linalg.norm(np.array((self.phate_operator.diff_potential[distinct_low_centrals,:] - self.phate_operator.diff_potential[i,:])), axis=1, ord=2)))
 
             scores = np.array(scores)
