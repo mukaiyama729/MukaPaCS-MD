@@ -9,6 +9,7 @@ import numpy as np
 from tqdm import tqdm
 import logging
 from scipy.sparse.linalg import eigs
+import copy
 logger = logging.getLogger('pacs_md')
 
 class PHATEAnalyzer(IAnalyzer):
@@ -77,7 +78,8 @@ class PHATEAnalyzer(IAnalyzer):
 
         if self.use_selected_structures:
             logger.info('use selected structures')
-            self.distinct_low_centrals = self._exclude_past_points(self.distinct_low_centrals, past_selected_indices)
+            diff_potential = copy.deepcopy(self.phate_operator.diff_potential)
+            self.distinct_low_centrals = self._exclude_past_points(self.distinct_low_centrals, past_selected_indices, diff_potential)
 
         distinct_low_central_keys = [analyzed_data_keys[i] for i in self.distinct_low_centrals]
         logger.info('distinct low central keys: {}'.format(distinct_low_central_keys))
@@ -104,13 +106,13 @@ class PHATEAnalyzer(IAnalyzer):
 
         return phate_analyzed_result_model
 
-    def _exclude_past_points(self, distinct_low_centrals: List[int], past_selected_indices: List[int]):
+    def _exclude_past_points(self, distinct_low_centrals: List[int], past_selected_indices: List[int], diff_potential: np.ndarray) -> List[int]:
         if any(past_selected_indices):
             logger.debug('past selected indices: {}'.format(past_selected_indices))
             distinct_low_centrals = np.array(distinct_low_centrals)
             scores = []
             for i in past_selected_indices:
-                scores.append(np.sqrt(np.linalg.norm(np.array((self.phate_operator.diff_potential[distinct_low_centrals,:] - self.phate_operator.diff_potential[i,:])), axis=1, ord=2)))
+                scores.append(np.sqrt(np.linalg.norm(np.array((diff_potential[distinct_low_centrals,:] - diff_potential[i,:])), axis=1, ord=2)))
 
             scores = np.array(scores)
             weights = np.linspace(10, 1, scores.shape[0])
