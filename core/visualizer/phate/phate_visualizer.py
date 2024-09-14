@@ -39,6 +39,8 @@ class PHATEVisualizer(IVisualizer):
         if np.any(past_selected_X):
             sc = ax.scatter(past_selected_X[:,0], past_selected_X[:,1], c=[i for i in range(past_selected_X.shape[0])], cmap='cool', marker='o', s=40, label='past selected point')
             plt.colorbar(sc)
+            for i in range(past_selected_X.shape[0]):
+                ax.text(past_selected_X[i, 0], past_selected_X[i, 1], str(i), fontsize=12, ha='right', va='bottom')
         ax.scatter(selected_X[:,0], selected_X[:,1], c='black', marker='*', s=50, label='selected point')
         ax.set_title('phate result cycle{}'.format(self._analyzed_result.current_state[1]))
         ax.set_xlabel('phate1')
