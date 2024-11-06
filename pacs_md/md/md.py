@@ -90,7 +90,7 @@ class MD(IMD):
 
     def execute_cpu_multi_command(self, multi_dir_pathes: str, total_process: int, threads_per_process: int):
         command = (
-            mpirun_command(total_process) +
+            mpirun_command(total_process, use_gpu=False) +
             'mdrun' +
             ' -multidir ' + multi_dir_pathes +
             ' -s ' + 'topol' +
