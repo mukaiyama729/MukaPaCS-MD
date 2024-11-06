@@ -61,7 +61,10 @@ class BasePaCSMD:
         self.md.set_input_dir(self.pacs_dir_pathes[0])
         self.md.set_output_dir(self.pacs_dir_pathes[0])
 
-        self.md.single_md(1, self.settings.threads_per_process, self.settings.use_gpu)
+        if self.settings.use_gpu:
+            self.md.single_md(1, self.settings.threads_per_process, self.settings.use_gpu)
+        else:
+            self.md.single_md(self.settings.process_per_node, self.settings.threads_per_process, self.settings.use_gpu)
 
     def _update_ranked_traj_list(self, analyzed_result_model) -> bool:
         self.rank_traj_list = self._select_structures(analyzed_result_model)
