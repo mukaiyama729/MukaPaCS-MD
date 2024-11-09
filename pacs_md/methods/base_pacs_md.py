@@ -208,6 +208,7 @@ class BasePaCSMD:
                 raise e
             self._update_ranked_traj_list(analyzed_result_model)
             self.cycle += 1
+            self.save_instance()
 
     def restart(self):
 
@@ -226,3 +227,7 @@ class BasePaCSMD:
                 raise e
             self._update_ranked_traj_list(analyzed_result_model)
             self.cycle += 1
+            self.save_instance()
+
+    def save_instance(self):
+        pass

@@ -62,7 +62,6 @@ class PHATEPaCSMD(BasePaCSMD):
             self.save_instance()
         self.save_instance()
 
-
     def rerun(self):
         logger.info('Run {}'.format(self._name))
         try:
@@ -71,7 +70,6 @@ class PHATEPaCSMD(BasePaCSMD):
             logger.error(e)
             self.save_instance()
         self.save_instance()
-
 
     def save_instance(self) -> None:
         logger.info('Save instance')
